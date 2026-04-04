@@ -1,0 +1,75 @@
+import { HumanMessage, AIMessage } from '@langchain/core/messages'
+import { graph } from '@/lib/graph'
+import type { SSEEvent } from '@/types'
+
+const encoder = new TextEncoder()
+
+function send(controller: ReadableStreamDefaultController, event: SSEEvent) {
+  controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`))
+}
+
+export async function POST(req: Request) {
+  let body: { messages?: Array<{ role: string; content: string }>; threadId?: string }
+  try {
+    body = await req.json()
+  } catch {
+    return Response.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+
+  const { messages, threadId } = body
+  if (!messages || !threadId) {
+    return Response.json({ error: 'messages and threadId are required' }, { status: 400 })
+  }
+
+  const lcMessages = messages.map(m =>
+    m.role === 'user' ? new HumanMessage(m.content) : new AIMessage(m.content)
+  )
+
+  const config = { configurable: { thread_id: threadId } }
+
+  const readable = new ReadableStream({
+    async start(controller) {
+      try {
+        const stream = await graph.stream(
+          { messages: lcMessages },
+          { ...config, streamMode: 'messages' }
+        )
+
+        for await (const [chunk, _metadata] of stream) {
+          const chunkType = chunk._getType?.()
+
+          if (chunkType === 'ai' && typeof chunk.content === 'string' && chunk.content) {
+            send(controller, { type: 'text', content: chunk.content })
+          }
+
+          if (chunk.tool_call_chunks?.length) {
+            for (const tc of chunk.tool_call_chunks) {
+              if (tc.name) send(controller, { type: 'tool_call', name: tc.name, id: tc.id ?? '' })
+            }
+          }
+
+          if (chunkType === 'tool') {
+            try {
+              send(controller, { type: 'tool_result', name: chunk.name, id: chunk.tool_call_id, result: JSON.parse(chunk.content) })
+            } catch {
+              send(controller, { type: 'tool_result', name: chunk.name, id: chunk.tool_call_id, result: chunk.content })
+            }
+          }
+        }
+      } catch {
+        send(controller, { type: 'error', message: 'Something went wrong. Please try again.' })
+      } finally {
+        controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+        controller.close()
+      }
+    },
+  })
+
+  return new Response(readable, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  })
+}
