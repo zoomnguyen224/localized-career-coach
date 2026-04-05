@@ -12,7 +12,7 @@
   --color-bg: #F8F9FB;
   --color-card: #FFFFFF;
   --color-border: #DCDFE8;
-  --color-muted: #727998;
+  --color-muted: #374151;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -38,7 +38,6 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);

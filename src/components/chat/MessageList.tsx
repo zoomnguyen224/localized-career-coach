@@ -3,12 +3,15 @@
 import React, { useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { ChatMessage, ToolResult, SkillGapResult, LearningPathResult, ExpertMatchResult, CareerInsight } from '@/types'
+import { ChatMessage, ToolResult, SkillGapResult, LearningPathResult, ExpertMatchResult, CareerInsight, JobMarketScanResult, InterviewEvaluation, SalaryBenchmarkResult } from '@/types'
 import { SkillRadarChart } from '@/components/generative-ui/SkillRadarChart'
 import { SkillGapTable } from '@/components/generative-ui/SkillGapTable'
 import { LearningPathTimeline } from '@/components/generative-ui/LearningPathTimeline'
 import { ExpertCard } from '@/components/generative-ui/ExpertCard'
 import { CareerInsightCard } from '@/components/generative-ui/CareerInsightCard'
+import { JobMatchCard } from '@/components/generative-ui/JobMatchCard'
+import { InterviewScoreCard } from '@/components/generative-ui/InterviewScoreCard'
+import { SalaryBenchmarkCard } from '@/components/generative-ui/SalaryBenchmarkCard'
 
 const LOADING_MESSAGES: Record<string, string> = {
   skill_gap_analysis: 'Analyzing skill gaps...',
@@ -16,6 +19,11 @@ const LOADING_MESSAGES: Record<string, string> = {
   expert_match: 'Finding mentors...',
   career_insight: 'Loading insight...',
   update_profile: 'Updating profile...',
+  parse_resume: 'Reading your CV...',
+  job_market_scan: 'Scanning MENA job market...',
+  generate_interview_question: 'Preparing interview question...',
+  evaluate_interview_answer: 'Evaluating your answer...',
+  salary_benchmark: 'Loading salary data...',
 }
 
 function ToolResultRenderer({ toolResult }: { toolResult: ToolResult }) {
@@ -24,7 +32,7 @@ function ToolResultRenderer({ toolResult }: { toolResult: ToolResult }) {
     return (
       <div
         data-testid={`tool-loading-${toolResult.toolName}`}
-        className="mt-2 animate-pulse rounded-lg bg-gray-100 px-4 py-3 text-sm text-gray-500"
+        className="mt-2 animate-pulse rounded-[10px] bg-blue/5 border border-blue/20 px-4 py-3 text-sm text-blue"
       >
         {loadingText}
       </div>
@@ -59,6 +67,43 @@ function ToolResultRenderer({ toolResult }: { toolResult: ToolResult }) {
     }
     case 'update_profile':
       return null
+
+    case 'parse_resume':
+      return null  // profile update handled in ChatInterface; no UI needed
+
+    case 'job_market_scan': {
+      const result = toolResult.result as JobMarketScanResult
+      return <JobMatchCard result={result} />
+    }
+
+    case 'generate_interview_question': {
+      // Show the question as a styled callout — the agent will ask the user to answer
+      const result = toolResult.result as { question: string; type: string; evaluationCriteria: string[] }
+      return (
+        <div className="mt-3 rounded-[10px] border border-blue/20 bg-blue/5 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-blue mb-2">Interview Question</p>
+          <p className="text-sm font-medium text-navy italic">&ldquo;{result.question}&rdquo;</p>
+          {result.evaluationCriteria?.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {result.evaluationCriteria.map((c: string) => (
+                <span key={c} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-muted">{c}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    case 'evaluate_interview_answer': {
+      const result = toolResult.result as InterviewEvaluation
+      return <InterviewScoreCard result={result} />
+    }
+
+    case 'salary_benchmark': {
+      const result = toolResult.result as SalaryBenchmarkResult
+      return <SalaryBenchmarkCard result={result} />
+    }
+
     default:
       return null
   }
@@ -81,7 +126,7 @@ export function MessageList({ messages }: MessageListProps) {
         if (message.role === 'user') {
           return (
             <div key={message.id} className="flex justify-end">
-              <div className="bg-teal text-white rounded-2xl rounded-tr-sm px-4 py-2 max-w-[80%]">
+              <div className="bg-blue text-white rounded-2xl rounded-tr-sm px-4 py-2 max-w-[80%]">
                 {message.content}
               </div>
             </div>
@@ -91,7 +136,7 @@ export function MessageList({ messages }: MessageListProps) {
         // assistant
         return (
           <div key={message.id} className="flex justify-start gap-2">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal text-sm font-semibold text-white">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue text-sm font-semibold text-white">
               L
             </div>
             <div className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm max-w-[85%]">

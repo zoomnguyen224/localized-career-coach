@@ -2,15 +2,18 @@
 
 import { useRef, useState, useCallback, KeyboardEvent } from 'react'
 import { Send } from 'lucide-react'
+import { extractTextFromFile } from '@/lib/pdf-utils'
 
 export interface ChatInputProps {
   onSend: (message: string) => void
   isLoading: boolean
+  onCVUpload?: (text: string, fileName: string) => void
 }
 
-export function ChatInput({ onSend, isLoading }: ChatInputProps) {
+export function ChatInput({ onSend, isLoading, onCVUpload }: ChatInputProps) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleSend = useCallback(() => {
     const trimmed = value.trim()
@@ -40,10 +43,44 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
     textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + 'px'
   }
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !onCVUpload) return
+    e.target.value = ''
+    try {
+      const text = await extractTextFromFile(file)
+      if (text.trim()) onCVUpload(text, file.name)
+    } catch {
+      onCVUpload(`[Could not extract text from ${file.name}. Please paste your CV text directly.]`, file.name)
+    }
+  }
+
   const isDisabled = isLoading || !value.trim()
 
   return (
-    <div className="bg-white border-t px-4 py-3 flex items-end gap-2">
+    <div className="bg-white border-t border-border px-4 py-3 flex items-end gap-2">
+      {/* Hidden file input */}
+      <input
+        type="file"
+        accept=".txt,.pdf,.doc,.docx"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
+      {/* Paperclip button */}
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        className="text-muted hover:text-blue transition-colors p-1.5 rounded-[8px] hover:bg-blue/10 flex-shrink-0"
+        aria-label="Upload CV"
+        title="Upload CV"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.414 6.586a6 6 0 008.485 8.485L20.5 13" />
+        </svg>
+      </button>
+
       <textarea
         ref={textareaRef}
         value={value}
@@ -52,17 +89,17 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
         disabled={isLoading}
         placeholder="Tell me about your background and career goals..."
         rows={1}
-        className="flex-1 resize-none focus:outline-none focus:ring-1 focus:ring-gray-300 border border-gray-200 rounded-lg px-3 py-2 text-sm leading-6"
+        className="flex-1 resize-none focus:outline-none border border-border focus:border-blue focus:ring-1 focus:ring-blue/30 rounded-[10px] bg-white px-3 py-2 text-sm leading-6"
         style={{ minHeight: '40px', maxHeight: '96px', overflowY: 'auto' }}
       />
       <button
         type="button"
         onClick={handleSend}
         disabled={isDisabled}
-        className={`flex-shrink-0 p-2 rounded-lg transition-colors ${
+        className={`flex-shrink-0 p-2 rounded-[14px] transition-colors ${
           isDisabled
             ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            : 'bg-teal-500 text-white hover:bg-teal-600'
+            : 'bg-blue hover:bg-blue/90 text-white'
         }`}
         aria-label="Send message"
       >

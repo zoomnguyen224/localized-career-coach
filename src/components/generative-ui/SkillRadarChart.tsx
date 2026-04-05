@@ -15,18 +15,23 @@ export function SkillRadarChart({ result }: Props) {
     required: gap.requiredLevel,
   }))
 
-  const readinessColor = overallReadiness >= 70 ? 'text-green-600' : overallReadiness >= 40 ? 'text-amber-600' : 'text-red-500'
+  const readinessBadgeClass =
+    overallReadiness >= 70
+      ? 'bg-green/10 text-green font-bold'
+      : overallReadiness >= 50
+      ? 'bg-amber-50 text-amber-600'
+      : 'bg-red-50 text-red-600'
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 my-3 w-full max-w-lg">
+    <div className="rounded-[10px] shadow-[0px_5px_60px_0px_rgba(151,155,192,0.2)] bg-white p-4 my-3 w-full max-w-lg">
       <div className="flex items-center justify-between mb-3">
         <div>
           <p className="font-semibold text-navy">{role.title}</p>
-          <p className="text-sm text-gray-500">{role.company} · {role.location}</p>
+          <p className="text-sm text-muted">{role.company} · {role.location}</p>
         </div>
         <div className="text-right">
-          <p className={`text-2xl font-bold ${readinessColor}`}>{overallReadiness}%</p>
-          <p className="text-xs text-gray-400">readiness</p>
+          <p className={`text-2xl font-bold rounded-full px-3 py-1 ${readinessBadgeClass}`}>{overallReadiness}%</p>
+          <p className="text-xs text-muted">readiness</p>
         </div>
       </div>
 
@@ -34,8 +39,8 @@ export function SkillRadarChart({ result }: Props) {
         <RadarChart data={chartData}>
           <PolarGrid stroke="#e5e7eb" />
           <PolarAngleAxis dataKey="skill" tick={{ fill: '#374151', fontSize: 11 }} />
-          <Radar name="Your Level" dataKey="current" stroke="#0EA5A0" fill="#0EA5A0" fillOpacity={0.4} isAnimationActive />
-          <Radar name="Role Required" dataKey="required" stroke="#0F2137" fill="#0F2137" fillOpacity={0.15} isAnimationActive />
+          <Radar name="Your Level" dataKey="current" stroke="#4584FF" fill="#4584FF" fillOpacity={0.3} isAnimationActive />
+          <Radar name="Role Required" dataKey="required" stroke="#06123C" fill="#06123C" fillOpacity={0.15} isAnimationActive />
           <Legend wrapperStyle={{ fontSize: 12 }} />
         </RadarChart>
       </ResponsiveContainer>
