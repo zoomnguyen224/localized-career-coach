@@ -3,7 +3,7 @@ import { MemorySaver } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import { ToolNode } from '@langchain/langgraph/prebuilt'
 import { SystemMessage, AIMessage } from '@langchain/core/messages'
-import { allTools } from './tools'
+import { allTools, createSearchResumeTool } from './tools'
 import { systemPrompt } from './system-prompt'
 
 const StateAnnotation = Annotation.Root({
@@ -22,8 +22,8 @@ const model = new ChatOpenAI({
   },
   temperature: 0.7,
 })
-const modelWithTools = model.bindTools(allTools)
-const toolNode = new ToolNode(allTools)
+
+// Shared across all graph instances — maintains conversation history per thread_id
 const checkpointer = new MemorySaver()
 
 function shouldContinue(state: typeof StateAnnotation.State): 'tools' | '__end__' {
@@ -32,15 +32,22 @@ function shouldContinue(state: typeof StateAnnotation.State): 'tools' | '__end__
   return '__end__'
 }
 
-async function callAgent(state: typeof StateAnnotation.State) {
-  const response = await modelWithTools.invoke([new SystemMessage(systemPrompt), ...state.messages])
-  return { messages: [response] }
-}
+export function createGraph(threadId: string) {
+  const searchResumeTool = createSearchResumeTool(threadId)
+  const tools = [...allTools, searchResumeTool]
+  const modelWithTools = model.bindTools(tools)
+  const toolNode = new ToolNode(tools)
 
-export const graph = new StateGraph(StateAnnotation)
-  .addNode('agent', callAgent)
-  .addNode('tools', toolNode)
-  .addEdge('__start__', 'agent')
-  .addConditionalEdges('agent', shouldContinue, { tools: 'tools', __end__: '__end__' })
-  .addEdge('tools', 'agent')
-  .compile({ checkpointer })
+  async function callAgent(state: typeof StateAnnotation.State) {
+    const response = await modelWithTools.invoke([new SystemMessage(systemPrompt), ...state.messages])
+    return { messages: [response] }
+  }
+
+  return new StateGraph(StateAnnotation)
+    .addNode('agent', callAgent)
+    .addNode('tools', toolNode)
+    .addEdge('__start__', 'agent')
+    .addConditionalEdges('agent', shouldContinue, { tools: 'tools', __end__: '__end__' })
+    .addEdge('tools', 'agent')
+    .compile({ checkpointer })
+}

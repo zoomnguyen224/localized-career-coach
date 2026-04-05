@@ -75,6 +75,7 @@ export async function POST(req: Request) {
   }
 
   const data = await response.json()
+  // Save raw content before JSON extraction — used as markdownContent for embedding
   const content: string = data.choices?.[0]?.message?.content ?? ''
 
   // Extract JSON — model may wrap in ```json fences
@@ -86,7 +87,8 @@ export async function POST(req: Request) {
 
   try {
     const parsed = JSON.parse(jsonMatch[0])
-    return Response.json(parsed)
+    // Return markdownContent as the raw vision output for downstream embedding
+    return Response.json({ ...parsed, markdownContent: content })
   } catch {
     return Response.json({ error: 'Invalid JSON from model' }, { status: 502 })
   }

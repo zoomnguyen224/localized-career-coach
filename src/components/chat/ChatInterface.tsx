@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ChatMessage, UserProfile, ParsedResumeResult } from '@/types'
 import { MessageList } from '@/components/chat/MessageList'
 import { ChatInput } from '@/components/chat/ChatInput'
@@ -26,6 +26,44 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
   const [isLoading, setIsLoading] = useState(false)
   const [showStarterCards, setShowStarterCards] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Restore messages from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(`localized_messages_${threadId}`)
+      if (stored) {
+        const parsed = JSON.parse(stored) as ChatMessage[]
+        if (parsed.length > 0) {
+          setMessages(parsed)
+          setShowStarterCards(false)
+        }
+      }
+    } catch {
+      // Ignore parse errors — start fresh
+    }
+  }, [threadId])
+
+  // Persist messages to localStorage on every change
+  useEffect(() => {
+    try {
+      localStorage.setItem(`localized_messages_${threadId}`, JSON.stringify(messages))
+    } catch {
+      // Ignore write errors (e.g. storage quota exceeded)
+    }
+  }, [messages, threadId])
+
+  // Re-embed CV markdown on mount if available (restores vector store after refresh)
+  useEffect(() => {
+    const markdown = localStorage.getItem(`localized_cv_markdown_${threadId}`)
+    if (!markdown) return
+    fetch('/api/embed-cv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ markdown, threadId }),
+    }).catch(() => {
+      // Silent failure — agent will work without vector search
+    })
+  }, [threadId])
 
   const triggerFileUpload = () => {
     fileInputRef.current?.click()
@@ -61,7 +99,6 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
         try { event = JSON.parse(trimmed.slice('data: '.length)) } catch { continue }
         setMessages(prev => {
           const next = [...prev]
-          // Find the assistant message to update (may not be last if messages were added)
           const idx = next.findIndex(m => m.id === assistantId)
           if (idx === -1) return prev
           const last = { ...next[idx] }
@@ -124,7 +161,7 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
     await streamAgentResponse(updatedMessages, assistantId)
   }
 
-  /** Vision-based PDF upload: renders pages to images, sends to /api/parse-cv, then agent. */
+  /** Vision-based PDF upload: renders pages to images, sends to /api/parse-cv, then embeds, then agent. */
   const handlePDFVision = async (file: File) => {
     setShowStarterCards(false)
     setIsLoading(true)
@@ -137,7 +174,6 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
       pageImages = result.images
       pageCount = result.pageCount
     } catch {
-      // Fallback to text extraction
       try {
         const text = await extractTextFromFile(file)
         if (text.trim()) {
@@ -192,12 +228,27 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
       if (res.ok) {
         parsedCV = await res.json()
         if (parsedCV.profile) onProfileUpdate(parsedCV.profile)
+
+        // 5. Embed the CV markdown for vector search (fire-and-forget, non-blocking)
+        const markdown = parsedCV.markdownContent
+        if (markdown) {
+          // Save to localStorage for re-embed on refresh
+          try {
+            localStorage.setItem(`localized_cv_markdown_${threadId}`, markdown)
+          } catch {}
+          // Embed in background — don't await, agent call proceeds regardless
+          fetch('/api/embed-cv', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ markdown, threadId }),
+          }).catch(() => {})
+        }
       }
     } catch {
       // Continue even if vision parse fails — agent will still respond
     }
 
-    // 5. Build context message for agent
+    // 6. Build context message for agent
     const skillsList = (parsedCV as { currentSkills?: Array<{ name: string }> }).currentSkills
       ?.map((s: { name: string }) => s.name)
       .join(', ') ?? ''
@@ -206,7 +257,7 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
     const agentMessage =
       `I've uploaded my CV (${file.name}). ${summary} ${skillsLine} Please analyze my background, run a skill gap analysis for my target role, and give me a comprehensive career assessment.`.trim()
 
-    // 6. Send to agent — use previousMessages + synthetic text message
+    // 7. Send to agent
     const agentTextMsg: ChatMessage = {
       id: cvUserMsg.id,
       role: 'user',

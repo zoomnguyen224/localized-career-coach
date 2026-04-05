@@ -1,7 +1,10 @@
 /**
  * @jest-environment node
  */
-import { skillGapAnalysisTool, learningPathTool, expertMatchTool, careerInsightTool, updateProfileTool } from '@/lib/tools'
+jest.mock('@/lib/vector-store')
+
+import { skillGapAnalysisTool, learningPathTool, expertMatchTool, careerInsightTool, updateProfileTool, createSearchResumeTool } from '@/lib/tools'
+import * as vectorStore from '@/lib/vector-store'
 
 describe('skillGapAnalysisTool', () => {
   it('matches AI/ML Engineer at NEOM for ML target role', async () => {
@@ -104,5 +107,32 @@ describe('updateProfileTool', () => {
     expect(result.name).toBe('Ahmed')
     expect(result.location).toBe('Riyadh')
     expect(result.targetRole).toBe('AI/ML Engineer')
+  })
+})
+
+describe('createSearchResumeTool', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  it('returns no-context message when no store exists', async () => {
+    jest.spyOn(vectorStore, 'getVectorStore').mockReturnValue(undefined)
+    const searchTool = createSearchResumeTool('thread-1')
+    const result = await searchTool.invoke({ query: 'certifications' })
+    const parsed = typeof result === 'string' ? JSON.parse(result) : result
+    expect(parsed.message).toBe('No CV context loaded')
+  })
+
+  it('returns chunks from vector store', async () => {
+    const mockStore = {
+      similaritySearch: jest.fn().mockResolvedValue([
+        { pageContent: 'AWS Certified Solutions Architect' },
+        { pageContent: 'GCP Professional Data Engineer' },
+      ]),
+    }
+    jest.spyOn(vectorStore, 'getVectorStore').mockReturnValue(mockStore as any)
+    const searchTool = createSearchResumeTool('thread-2')
+    const result = await searchTool.invoke({ query: 'cloud certifications' })
+    const parsed = typeof result === 'string' ? JSON.parse(result) : result
+    expect(parsed.source).toBe('cv')
+    expect(parsed.chunks).toContain('AWS Certified Solutions Architect')
   })
 })

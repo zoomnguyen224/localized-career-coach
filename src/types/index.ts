@@ -130,6 +130,7 @@ export interface ParsedResumeResult {
   profile: Partial<UserProfile>
   currentSkills: CurrentSkill[]
   rawSummary: string  // 1-2 sentence summary of candidate
+  markdownContent?: string  // raw vision model output for embedding
 }
 
 // Job market scan

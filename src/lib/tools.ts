@@ -1,6 +1,7 @@
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
 import { MENA_ROLES, EXPERT_NETWORK, CAREER_INSIGHTS, MENA_JOB_LISTINGS, INTERVIEW_QUESTIONS, SALARY_BENCHMARKS } from './mock-data'
+import { getVectorStore } from '@/lib/vector-store'
 import type { SkillGap, SkillGapResult, LearningPathResult, ExpertMatchResult, LearningPhase, ParsedResumeResult, CurrentSkill, JobMarketScanResult, JobMatch, InterviewQuestion, InterviewEvaluation, SalaryBenchmarkResult, SalaryRange, CertificationPremium, UserProfile } from '@/types'
 
 function findBestRole(targetRole: string) {
@@ -206,7 +207,28 @@ export const parseResumeTool = tool(
     const currentLevel: UserProfile['currentLevel'] = years === 0 ? 'student' : years < 2 ? 'junior' : years < 5 ? 'mid' : 'senior'
 
     // Extract skills (match against known skills)
-    const knownSkills = ['Python', 'SQL', 'JavaScript', 'TypeScript', 'React', 'Node.js', 'Java', 'C++', 'Machine Learning', 'TensorFlow', 'PyTorch', 'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'Git', 'Figma', 'Excel', 'PowerPoint', 'Tableau', 'Power BI', 'Linux', 'Networking', 'Data Visualization', 'Statistics', 'Agile', 'Scrum', 'System Design', 'REST APIs', 'GraphQL']
+    const knownSkills = [
+      // Engineering
+      'Python', 'SQL', 'JavaScript', 'TypeScript', 'React', 'Node.js', 'Java', 'C++',
+      'Docker', 'Kubernetes', 'Git', 'Linux', 'Networking', 'REST APIs', 'GraphQL',
+      'System Design', 'AWS', 'Azure', 'GCP',
+      // AI / ML
+      'Machine Learning', 'Deep Learning', 'TensorFlow', 'PyTorch', 'LLM', 'LangChain',
+      'RAG', 'Generative AI', 'NLP', 'Computer Vision', 'OpenAI', 'Prompt Engineering',
+      'AI', 'MLOps',
+      // Product & Business
+      'Product Management', 'Product Strategy', 'Roadmapping', 'OKRs', 'PRD',
+      'Agile', 'Scrum', 'Kanban', 'Stakeholder Management', 'Business Strategy',
+      'Go-to-Market', 'Market Research', 'User Research', 'A/B Testing',
+      // Presales / Solutions
+      'Presales', 'Solution Design', 'Solution Architecture', 'RFP', 'Demos',
+      'Customer Success', 'Enterprise Sales',
+      // Analytics & Data
+      'Data Analysis', 'Data Visualization', 'Tableau', 'Power BI', 'Excel',
+      'Statistics', 'Figma',
+      // Soft / Leadership
+      'Leadership', 'Cross-functional', 'Communication', 'Presentation',
+    ]
     const currentSkills: CurrentSkill[] = knownSkills
       .filter(skill => cvText.toLowerCase().includes(skill.toLowerCase()))
       .map(skill => ({
@@ -407,5 +429,24 @@ export const salaryBenchmarkTool = tool(
     }),
   }
 )
+
+export function createSearchResumeTool(threadId: string) {
+  return tool(
+    async ({ query, k = 4 }: { query: string; k?: number }) => {
+      const store = getVectorStore(threadId)
+      if (!store) return { message: 'No CV context loaded' }
+      const docs = await store.similaritySearch(query, k)
+      return { chunks: docs.map(d => d.pageContent), source: 'cv' as const }
+    },
+    {
+      name: 'search_resume',
+      description: 'Search the uploaded CV for specific details (certifications, projects, companies, dates, experience). Call this when you need precise information from the CV rather than relying on the initial parse summary.',
+      schema: z.object({
+        query: z.string().describe('What to search for in the CV'),
+        k: z.number().optional().describe('Number of results to return (default 4)'),
+      }),
+    }
+  )
+}
 
 export const allTools = [skillGapAnalysisTool, learningPathTool, expertMatchTool, careerInsightTool, updateProfileTool, parseResumeTool, jobMarketScanTool, generateInterviewQuestionTool, evaluateInterviewAnswerTool, salaryBenchmarkTool]

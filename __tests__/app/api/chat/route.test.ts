@@ -3,11 +3,11 @@
  */
 import { POST } from '@/app/api/chat/route'
 
-jest.mock('@/lib/graph', () => ({
-  graph: { stream: jest.fn() },
-}))
+const mockStream = jest.fn()
 
-import { graph } from '@/lib/graph'
+jest.mock('@/lib/graph', () => ({
+  createGraph: jest.fn(() => ({ stream: mockStream })),
+}))
 
 async function collectSSE(response: Response): Promise<string[]> {
   const reader = response.body!.getReader()
@@ -38,7 +38,7 @@ describe('POST /api/chat', () => {
 
   it('streams text events for AI text chunks', async () => {
     const mockChunk = { _getType: () => 'ai', content: 'Hello from the AI', tool_calls: [], tool_call_chunks: [] }
-    ;(graph.stream as jest.Mock).mockResolvedValue((async function* () { yield [mockChunk, {}] })())
+    mockStream.mockResolvedValue((async function* () { yield [mockChunk, {}] })())
 
     const req = new Request('http://localhost/api/chat', {
       method: 'POST',
@@ -55,7 +55,7 @@ describe('POST /api/chat', () => {
 
   it('streams tool_call event when AI initiates a tool call', async () => {
     const mockChunk = { _getType: () => 'ai', content: '', tool_calls: [], tool_call_chunks: [{ name: 'skill_gap_analysis', id: 'call_123', args: '' }] }
-    ;(graph.stream as jest.Mock).mockResolvedValue((async function* () { yield [mockChunk, {}] })())
+    mockStream.mockResolvedValue((async function* () { yield [mockChunk, {}] })())
 
     const req = new Request('http://localhost/api/chat', {
       method: 'POST',
@@ -69,7 +69,7 @@ describe('POST /api/chat', () => {
   })
 
   it('streams error event and [DONE] when graph throws', async () => {
-    ;(graph.stream as jest.Mock).mockResolvedValue((async function* () { throw new Error('API error') })())
+    mockStream.mockResolvedValue((async function* () { throw new Error('API error') })())
 
     const req = new Request('http://localhost/api/chat', {
       method: 'POST',

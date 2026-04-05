@@ -7,7 +7,7 @@ export async function pdfToImages(
   maxPages = 3
 ): Promise<{ images: string[]; pageCount: number }> {
   const pdfjs = await import('pdfjs-dist')
-  pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
+  pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
 
   const arrayBuffer = await file.arrayBuffer()
   const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise
@@ -35,7 +35,7 @@ export async function extractTextFromFile(file: File): Promise<string> {
   if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
     const pdfjs = await import('pdfjs-dist')
     // Use CDN worker to avoid Next.js bundling complexity
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
+    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
 
     const arrayBuffer = await file.arrayBuffer()
     const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise

@@ -1,5 +1,5 @@
 import { HumanMessage, AIMessage } from '@langchain/core/messages'
-import { graph } from '@/lib/graph'
+import { createGraph } from '@/lib/graph'
 import type { SSEEvent } from '@/types'
 
 const encoder = new TextEncoder()
@@ -21,6 +21,7 @@ export async function POST(req: Request) {
     return Response.json({ error: 'messages and threadId are required' }, { status: 400 })
   }
 
+  const graph = createGraph(threadId)
   const lcMessages = messages.map(m =>
     m.role === 'user' ? new HumanMessage(m.content) : new AIMessage(m.content)
   )
