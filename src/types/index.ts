@@ -94,11 +94,16 @@ export interface ToolResult {
   status: 'loading' | 'done'
 }
 
+export type MessageSegment =
+  | { type: 'text'; content: string }
+  | { type: 'tool'; toolResultId: string }
+
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
   toolResults: ToolResult[]
+  segments: MessageSegment[]  // ordered render sequence for assistant messages
 }
 
 export type SSEEvent =

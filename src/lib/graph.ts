@@ -1,6 +1,6 @@
 import { StateGraph, MessagesAnnotation, Annotation } from '@langchain/langgraph'
 import { MemorySaver } from '@langchain/langgraph'
-import { ChatAnthropic } from '@langchain/anthropic'
+import { ChatOpenAI } from '@langchain/openai'
 import { ToolNode } from '@langchain/langgraph/prebuilt'
 import { SystemMessage, AIMessage } from '@langchain/core/messages'
 import { allTools } from './tools'
@@ -10,11 +10,17 @@ const StateAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
 })
 
-const model = new ChatAnthropic({
-  model: 'claude-sonnet-4-6',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  invocationKwargs: { top_p: undefined } as any,
-  anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? 'placeholder-not-used-in-tests',
+const model = new ChatOpenAI({
+  modelName: process.env.OPENROUTER_MODEL ?? 'google/gemini-2.0-flash-lite-001',
+  openAIApiKey: process.env.OPENROUTER_API_KEY ?? 'placeholder-not-used-in-tests',
+  configuration: {
+    baseURL: 'https://openrouter.ai/api/v1',
+    defaultHeaders: {
+      'HTTP-Referer': 'https://localized.world',
+      'X-Title': 'Localized AI Career Coach',
+    },
+  },
+  temperature: 0.7,
 })
 const modelWithTools = model.bindTools(allTools)
 const toolNode = new ToolNode(allTools)

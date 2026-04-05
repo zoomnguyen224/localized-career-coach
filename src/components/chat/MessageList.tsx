@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { ChatMessage, ToolResult, SkillGapResult, LearningPathResult, ExpertMatchResult, CareerInsight, JobMarketScanResult, InterviewEvaluation, SalaryBenchmarkResult } from '@/types'
+import { ChatMessage, MessageSegment, ToolResult, SkillGapResult, LearningPathResult, ExpertMatchResult, CareerInsight, JobMarketScanResult, InterviewEvaluation, SalaryBenchmarkResult } from '@/types'
 import { SkillRadarChart } from '@/components/generative-ui/SkillRadarChart'
 import { SkillGapTable } from '@/components/generative-ui/SkillGapTable'
 import { LearningPathTimeline } from '@/components/generative-ui/LearningPathTimeline'
@@ -134,30 +134,43 @@ export function MessageList({ messages }: MessageListProps) {
         }
 
         // assistant
+        const segments = message.segments?.length
+          ? message.segments
+          : message.content
+            ? [{ type: 'text' as const, content: message.content }]
+            : []
+
         return (
           <div key={message.id} className="flex justify-start gap-2">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue text-sm font-semibold text-white">
               L
             </div>
             <div className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm max-w-[85%]">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                  ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
-                  ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
-                  li: ({ children }) => <li className="text-sm">{children}</li>,
-                  strong: ({ children }) => <strong className="font-semibold text-navy">{children}</strong>,
-                  h3: ({ children }) => <h3 className="font-bold text-navy text-sm mt-3 mb-1">{children}</h3>,
-                  code: ({ children }) => <code className="bg-gray-100 rounded px-1 py-0.5 text-xs font-mono">{children}</code>,
-                  hr: () => <hr className="border-border my-3" />,
-                }}
-              >
-                {message.content}
-              </ReactMarkdown>
-              {message.toolResults.map((toolResult) => (
-                <ToolResultRenderer key={toolResult.id} toolResult={toolResult} />
-              ))}
+              {segments.map((seg: MessageSegment, i: number) => {
+                if (seg.type === 'text') {
+                  return (
+                    <ReactMarkdown
+                      key={i}
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                        ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
+                        li: ({ children }) => <li className="text-sm">{children}</li>,
+                        strong: ({ children }) => <strong className="font-semibold text-navy">{children}</strong>,
+                        h3: ({ children }) => <h3 className="font-bold text-navy text-sm mt-3 mb-1">{children}</h3>,
+                        code: ({ children }) => <code className="bg-gray-100 rounded px-1 py-0.5 text-xs font-mono">{children}</code>,
+                        hr: () => <hr className="border-border my-3" />,
+                      }}
+                    >
+                      {seg.content}
+                    </ReactMarkdown>
+                  )
+                }
+                const toolResult = message.toolResults.find(t => t.id === seg.toolResultId)
+                if (!toolResult) return null
+                return <ToolResultRenderer key={seg.toolResultId} toolResult={toolResult} />
+              })}
             </div>
           </div>
         )

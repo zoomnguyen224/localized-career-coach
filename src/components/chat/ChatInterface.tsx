@@ -5,6 +5,7 @@ import { ChatMessage, UserProfile } from '@/types'
 import { MessageList } from '@/components/chat/MessageList'
 import { ChatInput } from '@/components/chat/ChatInput'
 import { StarterCards } from '@/components/chat/StarterCards'
+import { QuickActions } from '@/components/chat/QuickActions'
 import { extractTextFromFile } from '@/lib/pdf-utils'
 
 interface ChatInterfaceProps {
@@ -16,7 +17,8 @@ const initialWelcomeMessage: ChatMessage = {
   id: 'welcome',
   role: 'assistant',
   content: `مرحباً! I'm your **Localized AI Career Coach**, specialized in MENA job markets and career opportunities across the GCC.\n\nUpload your CV for instant analysis, or tell me about your background and goals — I'll map your skill gaps, build a learning path, and connect you with expert mentors.`,
-  toolResults: []
+  toolResults: [],
+  segments: [{ type: 'text', content: `مرحباً! I'm your **Localized AI Career Coach**, specialized in MENA job markets and career opportunities across the GCC.\n\nUpload your CV for instant analysis, or tell me about your background and goals — I'll map your skill gaps, build a learning path, and connect you with expert mentors.` }]
 }
 
 export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps) {
@@ -47,7 +49,8 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
       id: Date.now().toString(),
       role: 'user',
       content,
-      toolResults: []
+      toolResults: [],
+      segments: []
     }
     const updatedMessages = [...messages, userMessage]
     setIsLoading(true)
@@ -56,7 +59,8 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
       id: assistantId,
       role: 'assistant',
       content: '',
-      toolResults: []
+      toolResults: [],
+      segments: []
     }
     setMessages([...updatedMessages, emptyAssistant])
 
@@ -89,8 +93,18 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
           next[next.length - 1] = last
           if (event.type === 'text' && event.content) {
             last.content = last.content + event.content
+            // Append to existing trailing text segment, or push a new one
+            const segs = [...last.segments]
+            const lastSeg = segs[segs.length - 1]
+            if (lastSeg?.type === 'text') {
+              segs[segs.length - 1] = { type: 'text', content: lastSeg.content + event.content }
+            } else {
+              segs.push({ type: 'text', content: event.content })
+            }
+            last.segments = segs
           } else if (event.type === 'tool_call' && event.id && event.name) {
             last.toolResults = [...last.toolResults, { id: event.id, toolName: event.name, status: 'loading', result: null }]
+            last.segments = [...last.segments, { type: 'tool', toolResultId: event.id }]
           } else if (event.type === 'tool_result' && event.id) {
             last.toolResults = last.toolResults.map(tr =>
               tr.id === event.id ? { ...tr, status: 'done', result: event.result ?? null } : tr
@@ -132,6 +146,11 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
           onCVUpload={triggerFileUpload}
         />
       )}
+      <QuickActions
+        onSend={sendMessage}
+        onCVUpload={triggerFileUpload}
+        isLoading={isLoading}
+      />
       <ChatInput
         onSend={sendMessage}
         isLoading={isLoading}
