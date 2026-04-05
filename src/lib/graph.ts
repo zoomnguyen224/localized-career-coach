@@ -12,7 +12,8 @@ const StateAnnotation = Annotation.Root({
 
 const model = new ChatAnthropic({
   model: 'claude-sonnet-4-6',
-  temperature: 0.7,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  invocationKwargs: { top_p: undefined } as any,
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? 'placeholder-not-used-in-tests',
 })
 const modelWithTools = model.bindTools(allTools)

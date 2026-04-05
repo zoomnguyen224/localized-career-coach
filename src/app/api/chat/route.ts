@@ -38,8 +38,17 @@ export async function POST(req: Request) {
         for await (const [chunk, _metadata] of stream) {
           const chunkType = chunk._getType?.()
 
-          if (chunkType === 'ai' && typeof chunk.content === 'string' && chunk.content) {
-            send(controller, { type: 'text', content: chunk.content })
+          if (chunkType === 'ai') {
+            // content can be a string or an array of content blocks
+            if (typeof chunk.content === 'string' && chunk.content) {
+              send(controller, { type: 'text', content: chunk.content })
+            } else if (Array.isArray(chunk.content)) {
+              for (const block of chunk.content) {
+                if (block.type === 'text' && block.text) {
+                  send(controller, { type: 'text', content: block.text })
+                }
+              }
+            }
           }
 
           if (chunk.tool_call_chunks?.length) {
@@ -56,8 +65,9 @@ export async function POST(req: Request) {
             }
           }
         }
-      } catch {
-        send(controller, { type: 'error', message: 'Something went wrong. Please try again.' })
+      } catch (e) {
+        console.error('[chat/route] stream error:', e)
+        send(controller, { type: 'error', message: `Error: ${e instanceof Error ? e.message : String(e)}` })
       } finally {
         controller.enqueue(encoder.encode('data: [DONE]\n\n'))
         controller.close()

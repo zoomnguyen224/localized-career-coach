@@ -106,3 +106,74 @@ export type SSEEvent =
   | { type: 'tool_call'; name: string; id: string }
   | { type: 'tool_result'; name: string; id: string; result: unknown }
   | { type: 'error'; message: string }
+
+// CV / Resume parsing
+export interface CurrentSkill {
+  name: string
+  currentLevel: number  // 1-10 estimated from CV
+}
+
+export interface ParsedResumeResult {
+  profile: Partial<UserProfile>
+  currentSkills: CurrentSkill[]
+  rawSummary: string  // 1-2 sentence summary of candidate
+}
+
+// Job market scan
+export interface JobMatch {
+  title: string
+  company: string
+  location: string
+  salaryRange: string      // e.g. "SAR 12,000 – 18,000/mo"
+  matchScore: number       // 0-100
+  keyGaps: string[]        // skills they're missing
+  applyNow: boolean        // true = ready now, false = after learning path
+}
+
+export interface JobMarketScanResult {
+  immediateMatches: JobMatch[]   // matchScore >= 60 with current skills
+  futureMatches: JobMatch[]      // matchScore >= 60 after learning path
+  totalOpportunities: number
+  marketInsight: string
+}
+
+// Interview readiness
+export interface InterviewQuestion {
+  question: string
+  type: 'behavioral' | 'technical'
+  role: string
+  evaluationCriteria: string[]
+}
+
+export interface InterviewEvaluation {
+  question: string
+  score: number           // 0-100
+  verdict: 'strong' | 'good' | 'needs_work'
+  strengths: string[]
+  improvements: string[]
+  modelAnswer: string
+}
+
+// Salary benchmark
+export interface SalaryRange {
+  level: 'entry' | 'mid' | 'senior'
+  min: number
+  max: number
+  currency: string
+  country: string
+}
+
+export interface CertificationPremium {
+  certification: string
+  premiumPercent: number
+  description: string
+}
+
+export interface SalaryBenchmarkResult {
+  role: string
+  location: string
+  ranges: SalaryRange[]
+  certificationPremiums: CertificationPremium[]
+  insight: string
+  source: string
+}

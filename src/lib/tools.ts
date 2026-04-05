@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
-import { MENA_ROLES, EXPERT_NETWORK, CAREER_INSIGHTS } from './mock-data'
-import type { SkillGap, SkillGapResult, LearningPathResult, ExpertMatchResult, LearningPhase } from '@/types'
+import { MENA_ROLES, EXPERT_NETWORK, CAREER_INSIGHTS, MENA_JOB_LISTINGS, INTERVIEW_QUESTIONS, SALARY_BENCHMARKS } from './mock-data'
+import type { SkillGap, SkillGapResult, LearningPathResult, ExpertMatchResult, LearningPhase, ParsedResumeResult, CurrentSkill, JobMarketScanResult, JobMatch, InterviewQuestion, InterviewEvaluation, SalaryBenchmarkResult, SalaryRange, CertificationPremium, UserProfile } from '@/types'
 
 function findBestRole(targetRole: string) {
   const lower = targetRole.toLowerCase()

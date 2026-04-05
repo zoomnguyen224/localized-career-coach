@@ -1,4 +1,4 @@
-import type { MENARole, Expert, CareerInsight } from '@/types'
+import type { MENARole, Expert, CareerInsight, SalaryRange } from '@/types'
 
 export const MENA_ROLES: MENARole[] = [
   {
@@ -287,3 +287,198 @@ export const CAREER_INSIGHTS: CareerInsight[] = [
     topics: ['fintech', 'growth', 'payments', 'saudi', 'banking'],
   },
 ]
+
+// MENA Job Listings (for job market scan)
+export const MENA_JOB_LISTINGS = [
+  {
+    title: 'Data Analyst',
+    company: 'Saudi Aramco',
+    location: 'Dhahran, Saudi Arabia',
+    salaryRange: 'SAR 14,000 – 22,000/mo',
+    requiredSkills: ['Python', 'SQL', 'Data Visualization', 'Statistics', 'Excel'],
+    minReadiness: 55,
+  },
+  {
+    title: 'Product Manager',
+    company: 'Careem',
+    location: 'Dubai, UAE',
+    salaryRange: 'AED 18,000 – 28,000/mo',
+    requiredSkills: ['Agile', 'Stakeholder Management', 'SQL', 'Business Strategy', 'Figma'],
+    minReadiness: 60,
+  },
+  {
+    title: 'AI/ML Engineer',
+    company: 'NEOM',
+    location: 'NEOM, Saudi Arabia',
+    salaryRange: 'SAR 20,000 – 35,000/mo',
+    requiredSkills: ['Python', 'Machine Learning', 'TensorFlow', 'Mathematics', 'Cloud'],
+    minReadiness: 65,
+  },
+  {
+    title: 'Cloud Engineer',
+    company: 'STC',
+    location: 'Riyadh, Saudi Arabia',
+    salaryRange: 'SAR 16,000 – 26,000/mo',
+    requiredSkills: ['AWS', 'Linux', 'Networking', 'Terraform', 'Python'],
+    minReadiness: 55,
+  },
+  {
+    title: 'Software Engineer',
+    company: 'Talabat',
+    location: 'Kuwait City, Kuwait',
+    salaryRange: 'KWD 900 – 1,500/mo',
+    requiredSkills: ['React', 'Node.js', 'SQL', 'Git', 'System Design'],
+    minReadiness: 60,
+  },
+  {
+    title: 'Business Analyst',
+    company: 'PIF',
+    location: 'Riyadh, Saudi Arabia',
+    salaryRange: 'SAR 15,000 – 24,000/mo',
+    requiredSkills: ['Financial Modeling', 'Excel', 'PowerPoint', 'Stakeholder Management', 'Business Strategy'],
+    minReadiness: 50,
+  },
+  {
+    title: 'FinTech Developer',
+    company: 'stc pay',
+    location: 'Riyadh, Saudi Arabia',
+    salaryRange: 'SAR 18,000 – 28,000/mo',
+    requiredSkills: ['React Native', 'APIs', 'Security', 'Node.js', 'FinTech Regulations'],
+    minReadiness: 65,
+  },
+  {
+    title: 'UX Designer',
+    company: 'Noon',
+    location: 'Dubai, UAE',
+    salaryRange: 'AED 12,000 – 20,000/mo',
+    requiredSkills: ['Figma', 'User Research', 'Prototyping', 'Arabic UX', 'HTML/CSS'],
+    minReadiness: 55,
+  },
+]
+
+// Interview questions by role category
+export const INTERVIEW_QUESTIONS: Record<string, { behavioral: string[]; technical: string[] }> = {
+  'data': {
+    behavioral: [
+      'Tell me about a time you had to explain a complex data finding to a non-technical stakeholder.',
+      'Describe a situation where your analysis led to a business decision that saved time or money.',
+      'How do you prioritize when you have multiple data requests with competing deadlines?',
+    ],
+    technical: [
+      'Walk me through how you would clean a dataset with 30% missing values for a sales analysis.',
+      'How would you design a dashboard to track Saudization compliance metrics for a GCC enterprise?',
+      'Explain the difference between correlation and causation with a real-world MENA business example.',
+    ],
+  },
+  'product': {
+    behavioral: [
+      'Tell me about a product decision you made that turned out to be wrong. What did you learn?',
+      'How do you handle conflicting priorities between engineering capacity and business requirements?',
+      'Describe how you would approach launching a new feature in a market with low digital literacy.',
+    ],
+    technical: [
+      'How would you define KPIs for a new delivery feature on a super-app like Careem?',
+      'Walk me through your process for writing a PRD for a Saudization compliance tracking feature.',
+      'How would you prioritize a backlog of 50 feature requests using limited engineering resources?',
+    ],
+  },
+  'engineering': {
+    behavioral: [
+      'Describe a production incident you handled. What was your process for resolving it?',
+      'Tell me about a time you had to refactor legacy code while keeping the system running.',
+      'How do you stay current with emerging technologies while delivering on existing commitments?',
+    ],
+    technical: [
+      'How would you design a real-time notification system for 10 million users in the GCC?',
+      'Explain how you would handle API rate limiting in a fintech application processing payments.',
+      'How would you optimize a slow SQL query returning user activity data for reporting?',
+    ],
+  },
+  'default': {
+    behavioral: [
+      'Tell me about a time you had to learn something new quickly to complete a project.',
+      'Describe a situation where you disagreed with your manager. How did you handle it?',
+      'How do you manage your workload when facing tight deadlines and high expectations?',
+    ],
+    technical: [
+      'How would you approach building a feature that needs to work across different Arabic dialects?',
+      'Walk me through your problem-solving process when you encounter a bug in production.',
+      'How do you ensure code quality while working in a fast-paced startup environment?',
+    ],
+  },
+}
+
+// Need this type in mock-data for SALARY_BENCHMARKS
+interface SalaryBenchmarkData {
+  ranges: SalaryRange[]
+  certifications: Array<{ cert: string; premiumPercent: number; desc: string }>
+  insight: string
+}
+
+// Salary benchmark data
+export const SALARY_BENCHMARKS: Record<string, SalaryBenchmarkData> = {
+  'data analyst': {
+    ranges: [
+      { level: 'entry', min: 8000, max: 14000, currency: 'SAR', country: 'Saudi Arabia' },
+      { level: 'mid', min: 14000, max: 22000, currency: 'SAR', country: 'Saudi Arabia' },
+      { level: 'senior', min: 22000, max: 35000, currency: 'SAR', country: 'Saudi Arabia' },
+      { level: 'entry', min: 6000, max: 10000, currency: 'AED', country: 'UAE' },
+      { level: 'mid', min: 12000, max: 20000, currency: 'AED', country: 'UAE' },
+      { level: 'senior', min: 20000, max: 32000, currency: 'AED', country: 'UAE' },
+    ],
+    certifications: [
+      { cert: 'Google Data Analytics Certificate', premiumPercent: 12, desc: 'Widely recognized for entry-level roles' },
+      { cert: 'Microsoft Power BI Certification', premiumPercent: 18, desc: 'High demand in GCC enterprises' },
+      { cert: 'AWS Certified Data Analytics', premiumPercent: 25, desc: 'Premium for cloud-native roles' },
+    ],
+    insight: 'Python proficiency is required in 78% of Data Analyst job postings in Saudi Arabia (LinkedIn Jobs 2024).',
+  },
+  'ai/ml engineer': {
+    ranges: [
+      { level: 'entry', min: 12000, max: 20000, currency: 'SAR', country: 'Saudi Arabia' },
+      { level: 'mid', min: 20000, max: 32000, currency: 'SAR', country: 'Saudi Arabia' },
+      { level: 'senior', min: 32000, max: 55000, currency: 'SAR', country: 'Saudi Arabia' },
+      { level: 'entry', min: 12000, max: 18000, currency: 'AED', country: 'UAE' },
+      { level: 'mid', min: 18000, max: 30000, currency: 'AED', country: 'UAE' },
+      { level: 'senior', min: 30000, max: 50000, currency: 'AED', country: 'UAE' },
+    ],
+    certifications: [
+      { cert: 'TensorFlow Developer Certificate', premiumPercent: 20, desc: 'High signal for ML roles' },
+      { cert: 'AWS Machine Learning Specialty', premiumPercent: 28, desc: 'Top premium in GCC cloud roles' },
+      { cert: 'Deep Learning Specialization (Coursera)', premiumPercent: 15, desc: 'Foundational credibility signal' },
+    ],
+    insight: 'Vision 2030 AI initiatives created 40,000+ new AI/ML roles in Saudi Arabia between 2022-2024 (SDAIA Report 2024).',
+  },
+  'software engineer': {
+    ranges: [
+      { level: 'entry', min: 8000, max: 14000, currency: 'SAR', country: 'Saudi Arabia' },
+      { level: 'mid', min: 14000, max: 24000, currency: 'SAR', country: 'Saudi Arabia' },
+      { level: 'senior', min: 24000, max: 40000, currency: 'SAR', country: 'Saudi Arabia' },
+      { level: 'entry', min: 8000, max: 13000, currency: 'AED', country: 'UAE' },
+      { level: 'mid', min: 13000, max: 22000, currency: 'AED', country: 'UAE' },
+      { level: 'senior', min: 22000, max: 38000, currency: 'AED', country: 'UAE' },
+    ],
+    certifications: [
+      { cert: 'AWS Solutions Architect', premiumPercent: 23, desc: 'Average 23% salary increase in GCC (LinkedIn 2024)' },
+      { cert: 'Google Cloud Professional', premiumPercent: 19, desc: 'Growing demand with Vision 2030 cloud projects' },
+      { cert: 'Certified Kubernetes Administrator', premiumPercent: 21, desc: 'High value in enterprise/fintech' },
+    ],
+    insight: 'Bilingual (Arabic/English) software engineers earn 12-18% more in UAE roles requiring client-facing responsibilities.',
+  },
+  'product manager': {
+    ranges: [
+      { level: 'entry', min: 10000, max: 16000, currency: 'SAR', country: 'Saudi Arabia' },
+      { level: 'mid', min: 16000, max: 26000, currency: 'SAR', country: 'Saudi Arabia' },
+      { level: 'senior', min: 26000, max: 45000, currency: 'SAR', country: 'Saudi Arabia' },
+      { level: 'entry', min: 10000, max: 16000, currency: 'AED', country: 'UAE' },
+      { level: 'mid', min: 16000, max: 28000, currency: 'AED', country: 'UAE' },
+      { level: 'senior', min: 28000, max: 48000, currency: 'AED', country: 'UAE' },
+    ],
+    certifications: [
+      { cert: 'PMI Agile Certified Practitioner', premiumPercent: 16, desc: 'Strong signal for agile-first companies' },
+      { cert: 'Product School Certificate', premiumPercent: 11, desc: 'Recognized by GCC tech companies' },
+      { cert: 'SQL for Product Managers', premiumPercent: 9, desc: 'Differentiator in data-driven teams' },
+    ],
+    insight: 'Arabic-English bilingual Product Managers earn 18% more on average in Dubai\'s tech sector (Bayt.com Salary Survey 2024).',
+  },
+}

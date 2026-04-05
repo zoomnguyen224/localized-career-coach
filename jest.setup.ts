@@ -1,5 +1,13 @@
 import '@testing-library/jest-dom'
 
+// Polyfill TextEncoder/TextDecoder and ReadableStream for jsdom
+import { TextEncoder, TextDecoder } from 'util'
+import { ReadableStream } from 'stream/web'
+
+global.TextEncoder = TextEncoder as typeof global.TextEncoder
+global.TextDecoder = TextDecoder as typeof global.TextDecoder
+global.ReadableStream = ReadableStream as typeof global.ReadableStream
+
 // Only set up browser-specific mocks in jsdom environment
 if (typeof window !== 'undefined') {
   // Mock ResizeObserver (required by Recharts)
