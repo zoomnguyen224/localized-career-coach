@@ -98,12 +98,20 @@ export type MessageSegment =
   | { type: 'text'; content: string }
   | { type: 'tool'; toolResultId: string }
 
+export interface CVAttachment {
+  fileName: string
+  pageCount: number
+  pageImages: string[]  // base64 data URLs, max 3 pages
+}
+
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
   toolResults: ToolResult[]
   segments: MessageSegment[]  // ordered render sequence for assistant messages
+  cvAttachment?: CVAttachment  // for user messages with CV upload
+  isScanning?: boolean         // true while vision parse is in progress
 }
 
 export type SSEEvent =

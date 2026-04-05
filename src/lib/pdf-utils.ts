@@ -1,4 +1,33 @@
 /**
+ * Renders PDF pages to base64 JPEG images using canvas.
+ * Returns up to maxPages images for vision model consumption.
+ */
+export async function pdfToImages(
+  file: File,
+  maxPages = 3
+): Promise<{ images: string[]; pageCount: number }> {
+  const pdfjs = await import('pdfjs-dist')
+  pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
+
+  const arrayBuffer = await file.arrayBuffer()
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise
+  const pageCount = pdf.numPages
+  const images: string[] = []
+
+  for (let pageNum = 1; pageNum <= Math.min(pageCount, maxPages); pageNum++) {
+    const page = await pdf.getPage(pageNum)
+    const viewport = page.getViewport({ scale: 1.5 })
+    const canvas = document.createElement('canvas')
+    canvas.width = viewport.width
+    canvas.height = viewport.height
+    await page.render({ canvas, viewport }).promise
+    images.push(canvas.toDataURL('image/jpeg', 0.82))
+  }
+
+  return { images, pageCount }
+}
+
+/**
  * Extracts plain text from an uploaded file.
  * Supports PDF (via pdfjs-dist) and plain text files (.txt, .doc, .docx read as text).
  */

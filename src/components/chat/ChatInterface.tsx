@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { ChatMessage, UserProfile } from '@/types'
+import { ChatMessage, UserProfile, ParsedResumeResult } from '@/types'
 import { MessageList } from '@/components/chat/MessageList'
 import { ChatInput } from '@/components/chat/ChatInput'
 import { StarterCards } from '@/components/chat/StarterCards'
 import { QuickActions } from '@/components/chat/QuickActions'
-import { extractTextFromFile } from '@/lib/pdf-utils'
+import { pdfToImages, extractTextFromFile } from '@/lib/pdf-utils'
 
 interface ChatInterfaceProps {
   threadId: string
@@ -31,16 +31,74 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
     fileInputRef.current?.click()
   }
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    e.target.value = ''
-    try {
-      const text = await extractTextFromFile(file)
-      if (text.trim()) handleCVUpload(text, file.name)
-    } catch {
-      handleCVUpload(`[Could not extract text from ${file.name}. Please paste your CV text directly.]`, file.name)
+  /** Stream /api/chat SSE into the last message in state (by assistantId). */
+  const streamAgentResponse = async (
+    messagesToSend: ChatMessage[],
+    assistantId: string
+  ) => {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: messagesToSend, threadId })
+    })
+
+    const reader = response.body!.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() ?? ''
+      for (const line of lines) {
+        const trimmed = line.trim()
+        if (!trimmed) continue
+        if (trimmed === 'data: [DONE]') { setIsLoading(false); continue }
+        if (!trimmed.startsWith('data: ')) continue
+        let event: { type: string; content?: string; name?: string; id?: string; result?: unknown; message?: string }
+        try { event = JSON.parse(trimmed.slice('data: '.length)) } catch { continue }
+        setMessages(prev => {
+          const next = [...prev]
+          // Find the assistant message to update (may not be last if messages were added)
+          const idx = next.findIndex(m => m.id === assistantId)
+          if (idx === -1) return prev
+          const last = { ...next[idx] }
+          next[idx] = last
+          if (event.type === 'text' && event.content) {
+            last.content = last.content + event.content
+            last.isScanning = false
+            const segs = [...last.segments]
+            const lastSeg = segs[segs.length - 1]
+            if (lastSeg?.type === 'text') {
+              segs[segs.length - 1] = { type: 'text', content: lastSeg.content + event.content }
+            } else {
+              segs.push({ type: 'text', content: event.content })
+            }
+            last.segments = segs
+          } else if (event.type === 'tool_call' && event.id && event.name) {
+            last.isScanning = false
+            last.toolResults = [...last.toolResults, { id: event.id, toolName: event.name, status: 'loading', result: null }]
+            last.segments = [...last.segments, { type: 'tool', toolResultId: event.id }]
+          } else if (event.type === 'tool_result' && event.id) {
+            last.toolResults = last.toolResults.map(tr =>
+              tr.id === event.id ? { ...tr, status: 'done', result: event.result ?? null } : tr
+            )
+            if (event.name === 'update_profile') onProfileUpdate(event.result as Partial<UserProfile>)
+            if (event.name === 'parse_resume') {
+              const r = event.result as { profile?: Partial<UserProfile> }
+              if (r?.profile) onProfileUpdate(r.profile)
+            }
+          } else if (event.type === 'error' && event.message) {
+            last.isScanning = false
+            last.content = last.content + event.message
+          }
+          return next
+        })
+      }
     }
+    if (buffer.trim() === 'data: [DONE]') setIsLoading(false)
   }
 
   const sendMessage = async (content: string) => {
@@ -63,71 +121,137 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
       segments: []
     }
     setMessages([...updatedMessages, emptyAssistant])
-
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: updatedMessages, threadId })
-    })
-
-    const reader = response.body!.getReader()
-    const decoder = new TextDecoder()
-    let buffer = ''
-
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      buffer += decoder.decode(value, { stream: true })
-      const lines = buffer.split('\n')
-      buffer = lines.pop() ?? ''
-      for (const line of lines) {
-        const trimmed = line.trim()
-        if (!trimmed) continue
-        if (trimmed === 'data: [DONE]') { setIsLoading(false); continue }
-        if (!trimmed.startsWith('data: ')) continue
-        let event: { type: string; content?: string; name?: string; id?: string; result?: unknown; message?: string }
-        try { event = JSON.parse(trimmed.slice('data: '.length)) } catch { continue }
-        setMessages(prev => {
-          const next = [...prev]
-          const last = { ...next[next.length - 1] }
-          next[next.length - 1] = last
-          if (event.type === 'text' && event.content) {
-            last.content = last.content + event.content
-            // Append to existing trailing text segment, or push a new one
-            const segs = [...last.segments]
-            const lastSeg = segs[segs.length - 1]
-            if (lastSeg?.type === 'text') {
-              segs[segs.length - 1] = { type: 'text', content: lastSeg.content + event.content }
-            } else {
-              segs.push({ type: 'text', content: event.content })
-            }
-            last.segments = segs
-          } else if (event.type === 'tool_call' && event.id && event.name) {
-            last.toolResults = [...last.toolResults, { id: event.id, toolName: event.name, status: 'loading', result: null }]
-            last.segments = [...last.segments, { type: 'tool', toolResultId: event.id }]
-          } else if (event.type === 'tool_result' && event.id) {
-            last.toolResults = last.toolResults.map(tr =>
-              tr.id === event.id ? { ...tr, status: 'done', result: event.result ?? null } : tr
-            )
-            if (event.name === 'update_profile') onProfileUpdate(event.result as Partial<UserProfile>)
-            if (event.name === 'parse_resume') {
-              const r = event.result as { profile?: Partial<UserProfile> }
-              if (r?.profile) onProfileUpdate(r.profile)
-            }
-          } else if (event.type === 'error' && event.message) {
-            last.content = last.content + event.message
-          }
-          return next
-        })
-      }
-    }
-    if (buffer.trim() === 'data: [DONE]') setIsLoading(false)
+    await streamAgentResponse(updatedMessages, assistantId)
   }
 
-  const handleCVUpload = async (text: string, fileName: string) => {
+  /** Vision-based PDF upload: renders pages to images, sends to /api/parse-cv, then agent. */
+  const handlePDFVision = async (file: File) => {
+    setShowStarterCards(false)
+    setIsLoading(true)
+
+    // 1. Render PDF pages to images
+    let pageImages: string[] = []
+    let pageCount = 0
+    try {
+      const result = await pdfToImages(file)
+      pageImages = result.images
+      pageCount = result.pageCount
+    } catch {
+      // Fallback to text extraction
+      try {
+        const text = await extractTextFromFile(file)
+        if (text.trim()) {
+          await handleCVTextUpload(text, file.name)
+        } else {
+          await handleCVTextUpload(
+            `[The file "${file.name}" could not be read. It may not be a valid PDF. Please export your CV as PDF from Word or Google Docs and try again.]`,
+            file.name
+          )
+        }
+      } catch {
+        await handleCVTextUpload(
+          `[The file "${file.name}" could not be read. Please make sure it is a valid PDF — export from Word or Google Docs as PDF and try again.]`,
+          file.name
+        )
+      }
+      setIsLoading(false)
+      return
+    }
+
+    // 2. Snapshot current messages before we add new ones
+    const previousMessages = messages
+
+    // 3. Add user message with CV thumbnail + scanning assistant message
+    const cvUserMsg: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: `Uploaded CV: ${file.name}`,
+      toolResults: [],
+      segments: [],
+      cvAttachment: { fileName: file.name, pageCount, pageImages }
+    }
+    const assistantId = (Date.now() + 1).toString()
+    const scanningAssistant: ChatMessage = {
+      id: assistantId,
+      role: 'assistant',
+      content: '',
+      toolResults: [],
+      segments: [],
+      isScanning: true
+    }
+    setMessages(prev => [...prev, cvUserMsg, scanningAssistant])
+
+    // 4. Call vision parse endpoint
+    let parsedCV: Partial<ParsedResumeResult & { currentSkills: Array<{ name: string; currentLevel: number }> }> = {}
+    try {
+      const res = await fetch('/api/parse-cv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageDataUrls: pageImages, fileName: file.name })
+      })
+      if (res.ok) {
+        parsedCV = await res.json()
+        if (parsedCV.profile) onProfileUpdate(parsedCV.profile)
+      }
+    } catch {
+      // Continue even if vision parse fails — agent will still respond
+    }
+
+    // 5. Build context message for agent
+    const skillsList = (parsedCV as { currentSkills?: Array<{ name: string }> }).currentSkills
+      ?.map((s: { name: string }) => s.name)
+      .join(', ') ?? ''
+    const summary = parsedCV.rawSummary ? `Vision analysis: ${parsedCV.rawSummary}` : ''
+    const skillsLine = skillsList ? `Detected skills: ${skillsList}.` : ''
+    const agentMessage =
+      `I've uploaded my CV (${file.name}). ${summary} ${skillsLine} Please analyze my background, run a skill gap analysis for my target role, and give me a comprehensive career assessment.`.trim()
+
+    // 6. Send to agent — use previousMessages + synthetic text message
+    const agentTextMsg: ChatMessage = {
+      id: cvUserMsg.id,
+      role: 'user',
+      content: agentMessage,
+      toolResults: [],
+      segments: []
+    }
+    await streamAgentResponse([...previousMessages, agentTextMsg], assistantId)
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+
+    const name = file.name.toLowerCase()
+    const isPDF = file.type === 'application/pdf' || name.endsWith('.pdf')
+    const isDocx = file.type.includes('word') || name.endsWith('.docx') || name.endsWith('.doc')
+
+    if (isPDF) {
+      await handlePDFVision(file)
+    } else if (isDocx) {
+      await handleCVTextUpload(
+        `[Word document detected: "${file.name}". For best results, please export your CV as PDF from Word (File → Save As → PDF) or Google Docs (File → Download → PDF), then upload the PDF.]`,
+        file.name
+      )
+    } else {
+      try {
+        const text = await extractTextFromFile(file)
+        if (text.trim()) await handleCVTextUpload(text, file.name)
+      } catch {
+        await handleCVTextUpload(`[Could not extract text from ${file.name}. Please paste your CV text directly.]`, file.name)
+      }
+    }
+  }
+
+  const handleCVTextUpload = async (text: string, fileName: string) => {
     setShowStarterCards(false)
     const cvMessage = `I've uploaded my CV (${fileName}). Here is the content:\n\n${text.slice(0, 3000)}\n\nPlease analyze my background, extract my profile, then run a skill gap analysis for my target role.`
     await sendMessage(cvMessage)
+  }
+
+  // Kept for ChatInput compatibility (it passes text for .txt files dragged in)
+  const handleCVUpload = async (text: string, fileName: string) => {
+    await handleCVTextUpload(text, fileName)
   }
 
   return (

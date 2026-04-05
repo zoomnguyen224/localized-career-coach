@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { ChatMessage, MessageSegment, ToolResult, SkillGapResult, LearningPathResult, ExpertMatchResult, CareerInsight, JobMarketScanResult, InterviewEvaluation, SalaryBenchmarkResult } from '@/types'
+import { CVPreviewCard } from '@/components/chat/CVPreviewCard'
 import { SkillRadarChart } from '@/components/generative-ui/SkillRadarChart'
 import { SkillGapTable } from '@/components/generative-ui/SkillGapTable'
 import { LearningPathTimeline } from '@/components/generative-ui/LearningPathTimeline'
@@ -127,7 +128,11 @@ export function MessageList({ messages }: MessageListProps) {
           return (
             <div key={message.id} className="flex justify-end">
               <div className="bg-blue text-white rounded-2xl rounded-tr-sm px-4 py-2 max-w-[80%]">
-                {message.content}
+                {/* Only show text content if it's not a CV-only upload message */}
+                {!message.cvAttachment && message.content}
+                {message.cvAttachment && (
+                  <CVPreviewCard attachment={message.cvAttachment} />
+                )}
               </div>
             </div>
           )
@@ -146,6 +151,16 @@ export function MessageList({ messages }: MessageListProps) {
               L
             </div>
             <div className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm max-w-[85%]">
+              {/* Vision scanning state */}
+              {message.isScanning && (
+                <div className="flex items-center gap-2.5 py-1 text-sm text-blue">
+                  <div className="relative flex h-5 w-5 shrink-0 items-center justify-center">
+                    <div className="absolute h-5 w-5 animate-ping rounded-full bg-blue opacity-20" />
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-blue border-t-transparent" />
+                  </div>
+                  <span>Scanning your CV with AI vision...</span>
+                </div>
+              )}
               {segments.map((seg: MessageSegment, i: number) => {
                 if (seg.type === 'text') {
                   return (
