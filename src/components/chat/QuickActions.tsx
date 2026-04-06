@@ -1,7 +1,7 @@
 'use client'
 
 interface QuickActionsProps {
-  onSend: (message: string) => void
+  onInsert: (message: string) => void
   onCVUpload: () => void
   isLoading: boolean
 }
@@ -105,7 +105,7 @@ const ACTIONS = [
   },
 ]
 
-export function QuickActions({ onSend, onCVUpload, isLoading }: QuickActionsProps) {
+export function QuickActions({ onInsert, onCVUpload, isLoading }: QuickActionsProps) {
   return (
     <div className="bg-white border-t border-border px-4 py-2">
       <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pb-0.5">
@@ -114,7 +114,7 @@ export function QuickActions({ onSend, onCVUpload, isLoading }: QuickActionsProp
           <button
             key={action.id}
             disabled={isLoading}
-            onClick={() => action.isCVUpload ? onCVUpload() : onSend(action.message)}
+            onClick={() => action.isCVUpload ? onCVUpload() : onInsert(action.message)}
             className="flex items-center gap-1.5 flex-shrink-0 px-3 py-1.5 rounded-full border border-border bg-white hover:border-blue hover:text-blue hover:bg-blue/5 transition-colors text-navy disabled:opacity-40 disabled:cursor-not-allowed group"
           >
             <span className="text-muted group-hover:text-blue transition-colors">{action.icon}</span>

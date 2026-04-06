@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChatMessage, UserProfile, ParsedResumeResult, SkillGapResult, CVAttachment } from '@/types'
 import { MessageList } from '@/components/chat/MessageList'
-import { ChatInput } from '@/components/chat/ChatInput'
+import { ChatInput, ChatInputHandle } from '@/components/chat/ChatInput'
 import { StarterCards } from '@/components/chat/StarterCards'
 import { QuickActions } from '@/components/chat/QuickActions'
 import { pdfToImages, extractTextFromFile } from '@/lib/pdf-utils'
@@ -30,6 +30,7 @@ export function ChatInterface({ threadId, onProfileUpdate, onSkillGapResult, onC
   const [isLoading, setIsLoading] = useState(false)
   const [showStarterCards, setShowStarterCards] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const chatInputRef = useRef<ChatInputHandle>(null)
   const messagesRef = useRef<ChatMessage[]>([initialWelcomeMessage])
   const titleFiredRef = useRef(false)
 
@@ -90,10 +91,12 @@ export function ChatInterface({ threadId, onProfileUpdate, onSkillGapResult, onC
     messagesToSend: ChatMessage[],
     assistantId: string
   ) => {
+    // Exclude the static welcome message — it's UI-only and should not be sent to the LLM
+    const apiMessages = messagesToSend.filter(m => m.id !== 'welcome')
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: messagesToSend, threadId })
+      body: JSON.stringify({ messages: apiMessages, threadId })
     })
 
     const reader = response.body!.getReader()
@@ -359,11 +362,12 @@ export function ChatInterface({ threadId, onProfileUpdate, onSkillGapResult, onC
         />
       )}
       <QuickActions
-        onSend={sendMessage}
+        onInsert={(text) => chatInputRef.current?.insertText(text)}
         onCVUpload={triggerFileUpload}
         isLoading={isLoading}
       />
       <ChatInput
+        ref={chatInputRef}
         onSend={sendMessage}
         isLoading={isLoading}
         onCVUpload={handleCVUpload}

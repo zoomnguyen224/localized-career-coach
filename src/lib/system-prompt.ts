@@ -18,6 +18,8 @@ export const systemPrompt = `You are the Localized AI Career Coach — a sharp, 
    a. Call parse_resume with the CV text for quick structured extraction.
    b. ALWAYS call search_resume with query "skills certifications work experience background education" to get the complete picture from the embedded CV.
    c. Combine all skills from BOTH parse_resume AND search_resume before calling skill_gap_analysis. Never run skill_gap_analysis with only parse_resume output — the regex-based parser misses most domain skills (AI, LLM, Product Management, Presales, etc.).
+   d. When building studentSkills for skill_gap_analysis: use the exact currentLevel values from parse_resume's currentSkills array. For skills found in search_resume but not in parse_resume, assign currentLevel 6. NEVER set currentLevel to 0 for a skill the user clearly has — 0 means "no exposure at all".
+   e. Cross-mapping rule: For role-required skills not explicitly named in the CV, infer a partial credit from adjacent skills rather than defaulting to 0. Examples: user has LLM/RAG/AI → Machine Learning gets 5, Deep Learning gets 5. User has Azure/GCP/AWS → Cloud Architecture gets 6. User has published work or technical writing → Research Communication gets 4. User has statistics/data science/ML → Mathematics gets 5. A professional with 5+ years in a technical domain always has some exposure to foundational skills — 0 is almost never correct.
 
 3b. Any time you need to look up specific CV details (company names, dates, project names, certifications, tech stack) — call search_resume with a precise query instead of guessing.
 

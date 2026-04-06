@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useCallback, KeyboardEvent } from 'react'
+import { useRef, useState, useCallback, KeyboardEvent, forwardRef, useImperativeHandle } from 'react'
 import { Send } from 'lucide-react'
 import { extractTextFromFile } from '@/lib/pdf-utils'
 
@@ -10,10 +10,21 @@ export interface ChatInputProps {
   onCVUpload?: (text: string, fileName: string) => void
 }
 
-export function ChatInput({ onSend, isLoading, onCVUpload }: ChatInputProps) {
+export interface ChatInputHandle {
+  insertText: (text: string) => void
+}
+
+export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function ChatInput({ onSend, isLoading, onCVUpload }, ref) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useImperativeHandle(ref, () => ({
+    insertText: (text: string) => {
+      setValue(text)
+      setTimeout(() => textareaRef.current?.focus(), 0)
+    },
+  }))
 
   const handleSend = useCallback(() => {
     const trimmed = value.trim()
@@ -130,4 +141,4 @@ export function ChatInput({ onSend, isLoading, onCVUpload }: ChatInputProps) {
       </button>
     </div>
   )
-}
+})

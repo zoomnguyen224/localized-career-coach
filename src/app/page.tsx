@@ -33,6 +33,23 @@ function deriveCVAttachment(messages: ChatMessage[]): CVAttachment | null {
   return null
 }
 
+function deriveUserProfile(messages: ChatMessage[]): UserProfile {
+  let profile: UserProfile = {}
+  for (const msg of messages) {
+    for (const tr of msg.toolResults ?? []) {
+      if (tr.status !== 'done') continue
+      if (tr.toolName === 'update_profile') {
+        profile = { ...profile, ...(tr.result as Partial<UserProfile>) }
+      }
+      if (tr.toolName === 'parse_resume') {
+        const r = tr.result as { profile?: Partial<UserProfile> }
+        if (r?.profile) profile = { ...profile, ...r.profile }
+      }
+    }
+  }
+  return profile
+}
+
 function loadMessages(threadId: string): ChatMessage[] {
   try {
     const raw = localStorage.getItem(`localized_messages_${threadId}`)
@@ -67,6 +84,7 @@ export default function Home() {
     const msgs = loadMessages(activeId)
     setSkillGapResult(deriveSkillGapResult(msgs))
     setCvAttachment(deriveCVAttachment(msgs))
+    setUserProfile(deriveUserProfile(msgs))
   }, [])
 
   const syncActiveThread = useCallback((id: string) => {
@@ -102,8 +120,8 @@ export default function Home() {
 
   const handleSwitchConversation = useCallback((id: string) => {
     syncActiveThread(id)
-    setUserProfile({})
     const msgs = loadMessages(id)
+    setUserProfile(deriveUserProfile(msgs))
     setSkillGapResult(deriveSkillGapResult(msgs))
     setCvAttachment(deriveCVAttachment(msgs))
   }, [syncActiveThread])
@@ -126,8 +144,8 @@ export default function Home() {
           if (id === prev) {
             const next = remaining[0].id
             setActiveThreadId(next)
-            setUserProfile({})
             const msgs = loadMessages(next)
+            setUserProfile(deriveUserProfile(msgs))
             setSkillGapResult(deriveSkillGapResult(msgs))
             setCvAttachment(deriveCVAttachment(msgs))
             return next

@@ -26,14 +26,12 @@ export async function POST(req: Request) {
     m.role === 'user' ? new HumanMessage(m.content) : new AIMessage(m.content)
   )
 
-  const config = { configurable: { thread_id: threadId } }
-
   const readable = new ReadableStream({
     async start(controller) {
       try {
         const stream = await graph.stream(
           { messages: lcMessages },
-          { ...config, streamMode: 'messages' }
+          { streamMode: 'messages' }
         )
 
         for await (const [chunk, _metadata] of stream) {

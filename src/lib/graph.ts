@@ -1,5 +1,4 @@
 import { StateGraph, MessagesAnnotation, Annotation } from '@langchain/langgraph'
-import { MemorySaver } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import { ToolNode } from '@langchain/langgraph/prebuilt'
 import { SystemMessage, AIMessage } from '@langchain/core/messages'
@@ -22,9 +21,6 @@ const model = new ChatOpenAI({
   },
   temperature: 0.7,
 })
-
-// Shared across all graph instances — maintains conversation history per thread_id
-const checkpointer = new MemorySaver()
 
 function shouldContinue(state: typeof StateAnnotation.State): 'tools' | '__end__' {
   const lastMessage = state.messages.at(-1) as AIMessage
@@ -49,5 +45,5 @@ export function createGraph(threadId: string) {
     .addEdge('__start__', 'agent')
     .addConditionalEdges('agent', shouldContinue, { tools: 'tools', __end__: '__end__' })
     .addEdge('tools', 'agent')
-    .compile({ checkpointer })
+    .compile()
 }
