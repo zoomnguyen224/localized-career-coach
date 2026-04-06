@@ -18,6 +18,49 @@ function findBestRole(targetRole: string) {
   return scored[0].role
 }
 
+// Adjacent skills that provide partial credit when the exact skill name is missing.
+// Keys are lowercase required skill names; values are lowercase skill names that imply partial knowledge.
+const SKILL_CROSSMAP: Record<string, string[]> = {
+  'machine learning': ['ml', 'llm', 'rag', 'ai', 'nlp', 'tensorflow', 'pytorch', 'generative ai', 'deep learning', 'scikit', 'data science', 'statistics', 'llm agents', 'rag pipelines'],
+  'deep learning': ['llm', 'rag', 'ai', 'nlp', 'tensorflow', 'pytorch', 'machine learning', 'generative ai', 'neural', 'transformers', 'llm agents'],
+  'cloud architecture': ['aws', 'azure', 'gcp', 'docker', 'kubernetes', 'cloud', 'devops', 'infrastructure'],
+  'mathematics': ['statistics', 'python', 'data science', 'machine learning', 'ml', 'data analysis', 'analytics'],
+  'research communication': ['english', 'communication', 'presentation', 'leadership', 'writing', 'french', 'arabic'],
+  'stakeholder management': ['product management', 'leadership', 'communication', 'agile', 'scrum', 'project management', 'presales'],
+  'data engineering': ['python', 'sql', 'etl', 'spark', 'airflow', 'data pipelines', 'gcp', 'azure', 'aws'],
+  'mlops': ['docker', 'kubernetes', 'ci/cd', 'devops', 'cloud', 'python', 'azure', 'gcp', 'aws'],
+  'system design': ['software', 'architecture', 'backend', 'cloud', 'rest apis', 'microservices'],
+  'nlp': ['llm', 'rag', 'ai', 'generative ai', 'python', 'transformers', 'llm agents'],
+  'sql': ['data analysis', 'data engineering', 'database', 'python', 'analytics'],
+  'aws': ['cloud', 'azure', 'gcp', 'docker', 'devops', 'infrastructure'],
+  'azure': ['cloud', 'aws', 'gcp', 'docker', 'devops', 'infrastructure'],
+  'product strategy': ['product management', 'product ownership', 'roadmapping', 'okrs', 'business strategy'],
+  'product management': ['product ownership', 'product strategy', 'agile', 'scrum', 'stakeholder management'],
+}
+
+/**
+ * When a required skill has no direct match in the student's skill map,
+ * infer a partial credit level from adjacent/related skills.
+ * Returns 0 if no related skills are found.
+ */
+function inferCrossCredit(requiredSkillName: string, skillMap: Map<string, number>): number {
+  const related = SKILL_CROSSMAP[requiredSkillName.toLowerCase()]
+  if (!related) return 0
+
+  let maxRelated = 0
+  for (const relatedTerm of related) {
+    for (const [key, level] of skillMap.entries()) {
+      if (key.includes(relatedTerm) || relatedTerm.includes(key)) {
+        if (level > maxRelated) maxRelated = level
+      }
+    }
+  }
+
+  if (maxRelated === 0) return 0
+  // Discount by ~35% — adjacent skill, not the exact skill
+  return Math.max(1, Math.round(maxRelated * 0.65))
+}
+
 function computeSeverity(currentLevel: number, requiredLevel: number): SkillGap['severity'] {
   const gap = requiredLevel - currentLevel
   if (gap >= 4) return 'high'
@@ -47,7 +90,7 @@ export const skillGapAnalysisTool = tool(
     const skillMap = new Map(studentSkills.map((s: { name: string; currentLevel: number }) => [s.name.toLowerCase(), s.currentLevel]))
 
     const gaps: SkillGap[] = role.requiredSkills.map(req => {
-      const currentLevel = skillMap.get(req.name.toLowerCase()) ?? 0
+      const currentLevel = skillMap.get(req.name.toLowerCase()) ?? inferCrossCredit(req.name, skillMap)
       const gap = Math.max(0, req.level - currentLevel)
       const severity = computeSeverity(currentLevel, req.level)
       return { skill: req.name, category: req.category, currentLevel, requiredLevel: req.level, gap, severity, recommendedAction: getRecommendedAction(req.name, severity) }
