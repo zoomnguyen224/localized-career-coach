@@ -1,16 +1,20 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { ChatMessage, UserProfile, ParsedResumeResult } from '@/types'
+import { ChatMessage, UserProfile, ParsedResumeResult, SkillGapResult, CVAttachment } from '@/types'
 import { MessageList } from '@/components/chat/MessageList'
 import { ChatInput } from '@/components/chat/ChatInput'
 import { StarterCards } from '@/components/chat/StarterCards'
 import { QuickActions } from '@/components/chat/QuickActions'
 import { pdfToImages, extractTextFromFile } from '@/lib/pdf-utils'
+import { touchConversation } from '@/lib/conversation-store'
 
 interface ChatInterfaceProps {
   threadId: string
   onProfileUpdate: (profile: Partial<UserProfile>) => void
+  onSkillGapResult: (result: SkillGapResult) => void
+  onCVUploaded: (attachment: CVAttachment) => void
+  onTitleGenerated: (threadId: string, title: string) => void
 }
 
 const initialWelcomeMessage: ChatMessage = {
@@ -21,11 +25,13 @@ const initialWelcomeMessage: ChatMessage = {
   segments: [{ type: 'text', content: `مرحباً! I'm your **Localized AI Career Coach**, specialized in MENA job markets and career opportunities across the GCC.\n\nUpload your CV for instant analysis, or tell me about your background and goals — I'll map your skill gaps, build a learning path, and connect you with expert mentors.` }]
 }
 
-export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps) {
+export function ChatInterface({ threadId, onProfileUpdate, onSkillGapResult, onCVUploaded, onTitleGenerated }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([initialWelcomeMessage])
   const [isLoading, setIsLoading] = useState(false)
   const [showStarterCards, setShowStarterCards] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const messagesRef = useRef<ChatMessage[]>([initialWelcomeMessage])
+  const titleFiredRef = useRef(false)
 
   // Restore messages from localStorage on mount
   useEffect(() => {
@@ -51,6 +57,16 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
       // Ignore write errors (e.g. storage quota exceeded)
     }
   }, [messages, threadId])
+
+  // Keep messagesRef in sync for post-stream title generation
+  useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
+
+  // Reset title-fired guard when thread changes (guards against refresh mid-stream)
+  useEffect(() => {
+    titleFiredRef.current = false
+  }, [threadId])
 
   // Re-embed CV markdown on mount if available (restores vector store after refresh)
   useEffect(() => {
@@ -127,6 +143,7 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
               const r = event.result as { profile?: Partial<UserProfile> }
               if (r?.profile) onProfileUpdate(r.profile)
             }
+            if (event.name === 'skill_gap_analysis') onSkillGapResult(event.result as SkillGapResult)
           } else if (event.type === 'error' && event.message) {
             last.isScanning = false
             last.content = last.content + event.message
@@ -136,6 +153,25 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
       }
     }
     if (buffer.trim() === 'data: [DONE]') setIsLoading(false)
+
+    // Touch conversation to bump updatedAt in the list
+    touchConversation(threadId)
+
+    // Auto-title: fire once after first exchange (welcome + user + assistant = 3 messages)
+    const currentMsgs = messagesRef.current
+    if (!titleFiredRef.current && currentMsgs.length === 3) {
+      titleFiredRef.current = true
+      const firstUser = currentMsgs[1]?.content ?? ''
+      const firstAssistant = currentMsgs[2]?.content ?? ''
+      fetch('/api/title', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstUserMessage: firstUser, firstAssistantMessage: firstAssistant }),
+      })
+        .then(r => r.json())
+        .then(({ title }: { title: string }) => { if (title) onTitleGenerated(threadId, title) })
+        .catch(() => {})
+    }
   }
 
   const sendMessage = async (content: string) => {
@@ -216,6 +252,7 @@ export function ChatInterface({ threadId, onProfileUpdate }: ChatInterfaceProps)
       isScanning: true
     }
     setMessages(prev => [...prev, cvUserMsg, scanningAssistant])
+    onCVUploaded({ fileName: file.name, pageCount, pageImages })
 
     // 4. Call vision parse endpoint
     let parsedCV: Partial<ParsedResumeResult & { currentSkills: Array<{ name: string; currentLevel: number }> }> = {}

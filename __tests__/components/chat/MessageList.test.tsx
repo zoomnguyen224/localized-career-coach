@@ -31,7 +31,8 @@ describe('MessageList', () => {
         id: '1',
         role: 'user',
         content: 'Hello, I need career advice',
-        toolResults: []
+        toolResults: [],
+        segments: []
       }
     ]
     render(<MessageList messages={messages} />)
@@ -47,7 +48,8 @@ describe('MessageList', () => {
         id: '1',
         role: 'assistant',
         content: 'I can help you with your career',
-        toolResults: []
+        toolResults: [],
+        segments: []
       }
     ]
     render(<MessageList messages={messages} />)
@@ -69,6 +71,10 @@ describe('MessageList', () => {
             result: null,
             status: 'loading'
           }
+        ],
+        segments: [
+          { type: 'text', content: 'Analyzing...' },
+          { type: 'tool', toolResultId: 'tr1' }
         ]
       }
     ]
@@ -91,6 +97,10 @@ describe('MessageList', () => {
             result: { gaps: [] },
             status: 'done'
           }
+        ],
+        segments: [
+          { type: 'text', content: 'Here is your analysis' },
+          { type: 'tool', toolResultId: 'tr1' }
         ]
       }
     ]
@@ -112,6 +122,10 @@ describe('MessageList', () => {
             result: { gaps: [] },
             status: 'done'
           }
+        ],
+        segments: [
+          { type: 'text', content: 'Here is your analysis' },
+          { type: 'tool', toolResultId: 'tr1' }
         ]
       }
     ]
@@ -133,6 +147,10 @@ describe('MessageList', () => {
             result: { phases: [] },
             status: 'done'
           }
+        ],
+        segments: [
+          { type: 'text', content: 'Here is your learning path' },
+          { type: 'tool', toolResultId: 'tr1' }
         ]
       }
     ]
@@ -154,6 +172,10 @@ describe('MessageList', () => {
             result: { experts: [] },
             status: 'done'
           }
+        ],
+        segments: [
+          { type: 'text', content: 'Here are some experts' },
+          { type: 'tool', toolResultId: 'tr1' }
         ]
       }
     ]
@@ -175,6 +197,10 @@ describe('MessageList', () => {
             result: { insight: { stat: '50%', description: 'test' } },
             status: 'done'
           }
+        ],
+        segments: [
+          { type: 'text', content: 'Here is an insight' },
+          { type: 'tool', toolResultId: 'tr1' }
         ]
       }
     ]
@@ -196,6 +222,10 @@ describe('MessageList', () => {
             result: { success: true },
             status: 'done'
           }
+        ],
+        segments: [
+          { type: 'text', content: 'Profile updated' },
+          { type: 'tool', toolResultId: 'tr1' }
         ]
       }
     ]
@@ -215,19 +245,22 @@ describe('MessageList', () => {
         id: '1',
         role: 'user',
         content: 'First message',
-        toolResults: []
+        toolResults: [],
+        segments: []
       },
       {
         id: '2',
         role: 'assistant',
         content: 'Second message',
-        toolResults: []
+        toolResults: [],
+        segments: []
       },
       {
         id: '3',
         role: 'user',
         content: 'Third message',
-        toolResults: []
+        toolResults: [],
+        segments: []
       }
     ]
     render(<MessageList messages={messages} />)
@@ -252,6 +285,10 @@ describe('MessageList', () => {
             result: null,
             status: 'loading'
           }
+        ],
+        segments: [
+          { type: 'text', content: 'Building...' },
+          { type: 'tool', toolResultId: 'tr1' }
         ]
       }
     ]
@@ -274,6 +311,10 @@ describe('MessageList', () => {
             result: null,
             status: 'loading'
           }
+        ],
+        segments: [
+          { type: 'text', content: 'Searching...' },
+          { type: 'tool', toolResultId: 'tr1' }
         ]
       }
     ]
@@ -296,6 +337,10 @@ describe('MessageList', () => {
             result: null,
             status: 'loading'
           }
+        ],
+        segments: [
+          { type: 'text', content: 'Loading...' },
+          { type: 'tool', toolResultId: 'tr1' }
         ]
       }
     ]
@@ -318,6 +363,10 @@ describe('MessageList', () => {
             result: null,
             status: 'loading'
           }
+        ],
+        segments: [
+          { type: 'text', content: 'Updating...' },
+          { type: 'tool', toolResultId: 'tr1' }
         ]
       }
     ]

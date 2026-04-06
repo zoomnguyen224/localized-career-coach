@@ -36,4 +36,23 @@ describe('SkillRadarChart', () => {
     render(<SkillRadarChart result={mockResult} />)
     expect(screen.getByText(/35%/)).toBeInTheDocument()
   })
+
+  it('renders in compact mode without legend', () => {
+    const result: SkillGapResult = {
+      role: { id: '1', title: 'PM', company: 'Acme', location: 'Dubai', requiredSkills: [] },
+      gaps: Array.from({ length: 8 }, (_, i) => ({
+        skill: `Skill ${i}`,
+        category: 'technical' as const,
+        currentLevel: 5,
+        requiredLevel: 8,
+        gap: 3,
+        severity: 'medium' as const,
+        recommendedAction: 'Learn it',
+      })),
+      overallReadiness: 60,
+    }
+    const { queryByTestId } = render(<SkillRadarChart result={result} compact />)
+    // Legend shows "Your Level" and "Role Required" — should be absent in compact mode
+    expect(queryByTestId('legend')).not.toBeInTheDocument()
+  })
 })

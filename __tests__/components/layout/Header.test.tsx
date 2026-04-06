@@ -17,9 +17,9 @@ describe('Header', () => {
     expect(screen.getByText('Beta')).toBeInTheDocument()
   })
 
-  it('has navy background class', () => {
+  it('has white background class', () => {
     const { container } = render(<Header />)
     const nav = container.firstChild as HTMLElement
-    expect(nav).toHaveClass('bg-navy')
+    expect(nav).toHaveClass('bg-white')
   })
 })

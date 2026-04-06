@@ -54,7 +54,7 @@ describe('ChatInput', () => {
 
   it('send button is disabled when input is empty', () => {
     render(<ChatInput onSend={mockOnSend} isLoading={false} />)
-    const button = screen.getByRole('button')
+    const button = screen.getByRole('button', { name: /send message/i })
     expect(button).toBeDisabled()
   })
 
@@ -64,14 +64,14 @@ describe('ChatInput', () => {
     const textarea = screen.getByPlaceholderText('Tell me about your background and career goals...')
     // Even after typing, button should still be disabled because isLoading
     // (textarea is disabled so typing won't work, but we check the button)
-    const button = screen.getByRole('button')
+    const button = screen.getByRole('button', { name: /send message/i })
     expect(button).toBeDisabled()
   })
 
   it('does NOT call onSend when button is disabled and clicked', () => {
     render(<ChatInput onSend={mockOnSend} isLoading={false} />)
     // Input is empty so button is disabled
-    const button = screen.getByRole('button')
+    const button = screen.getByRole('button', { name: /send message/i })
     fireEvent.click(button)
     expect(mockOnSend).not.toHaveBeenCalled()
   })

@@ -58,14 +58,14 @@ describe('ExpertCard', () => {
     render(<ExpertCard {...mockResult} />)
     const tealBadge = screen.getByText('92% match')
     expect(tealBadge).toBeInTheDocument()
-    expect(tealBadge.className).toMatch(/bg-teal/)
+    expect(tealBadge.className).toMatch(/bg-green/)
   })
 
   it('shows match score badge with amber styling for score 60-79', () => {
     render(<ExpertCard {...mockResult} />)
     const amberBadge = screen.getByText('72% match')
     expect(amberBadge).toBeInTheDocument()
-    expect(amberBadge.className).toMatch(/bg-amber-500/)
+    expect(amberBadge.className).toMatch(/bg-amber-50/)
   })
 
   it('shows match score badge with gray styling for score below 60', () => {

@@ -46,12 +46,21 @@ function mockFetch(lines: string[]) {
 
 const defaultProps = {
   threadId: 'thread-123',
-  onProfileUpdate: jest.fn()
+  onProfileUpdate: jest.fn(),
+  onSkillGapResult: jest.fn(),
+  onCVUploaded: jest.fn(),
+  onTitleGenerated: jest.fn(),
 }
 
 describe('ChatInterface', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    // Default mock for /api/title (fire-and-forget in streamAgentResponse)
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ title: '' }),
+      body: null,
+    })
   })
 
   test('1. Shows welcome message on mount', () => {
@@ -153,13 +162,16 @@ describe('ChatInterface', () => {
           <ChatInterface
             threadId="thread-123"
             onProfileUpdate={onProfileUpdate}
+            onSkillGapResult={jest.fn()}
+            onCVUploaded={jest.fn()}
+            onTitleGenerated={jest.fn()}
           />
         </>
       )
     }
 
     // Simpler approach: just verify fetch was called correctly and no errors thrown
-    render(<ChatInterface threadId="thread-123" onProfileUpdate={onProfileUpdate} />)
+    render(<ChatInterface threadId="thread-123" onProfileUpdate={onProfileUpdate} onSkillGapResult={jest.fn()} onCVUploaded={jest.fn()} onTitleGenerated={jest.fn()} />)
 
     const sendButton = screen.getByTestId('send-button')
 
@@ -187,7 +199,7 @@ describe('ChatInterface', () => {
     ])
 
     const onProfileUpdate = jest.fn()
-    render(<ChatInterface threadId="thread-123" onProfileUpdate={onProfileUpdate} />)
+    render(<ChatInterface threadId="thread-123" onProfileUpdate={onProfileUpdate} onSkillGapResult={jest.fn()} onCVUploaded={jest.fn()} onTitleGenerated={jest.fn()} />)
 
     const sendButton = screen.getByTestId('send-button')
 
@@ -212,7 +224,7 @@ describe('ChatInterface', () => {
     ])
 
     const onProfileUpdate = jest.fn()
-    render(<ChatInterface threadId="thread-123" onProfileUpdate={onProfileUpdate} />)
+    render(<ChatInterface threadId="thread-123" onProfileUpdate={onProfileUpdate} onSkillGapResult={jest.fn()} onCVUploaded={jest.fn()} onTitleGenerated={jest.fn()} />)
 
     const sendButton = screen.getByTestId('send-button')
 
@@ -267,5 +279,20 @@ describe('ChatInterface', () => {
       const lastAssistant = assistantMessages[assistantMessages.length - 1]
       expect(lastAssistant.textContent).toContain('Something went wrong')
     })
+  })
+
+  it('accepts onSkillGapResult, onCVUploaded, and onTitleGenerated without error', () => {
+    const mockProfileUpdate = jest.fn()
+    expect(() =>
+      render(
+        <ChatInterface
+          threadId="test-thread"
+          onProfileUpdate={mockProfileUpdate}
+          onSkillGapResult={jest.fn()}
+          onCVUploaded={jest.fn()}
+          onTitleGenerated={jest.fn()}
+        />
+      )
+    ).not.toThrow()
   })
 })

@@ -4,12 +4,15 @@ import type { SkillGapResult } from '@/types'
 
 interface Props {
   result: SkillGapResult
+  compact?: boolean
 }
 
-export function SkillRadarChart({ result }: Props) {
+export function SkillRadarChart({ result, compact = false }: Props) {
   const { role, gaps, overallReadiness } = result
+  const maxSkills = compact ? 6 : 8
+  const chartHeight = compact ? 200 : 280
 
-  const chartData = gaps.slice(0, 8).map(gap => ({
+  const chartData = gaps.slice(0, maxSkills).map(gap => ({
     skill: gap.skill.length > 12 ? gap.skill.slice(0, 12) + '…' : gap.skill,
     current: gap.currentLevel,
     required: gap.requiredLevel,
@@ -35,13 +38,13 @@ export function SkillRadarChart({ result }: Props) {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" height={chartHeight}>
         <RadarChart data={chartData}>
           <PolarGrid stroke="#e5e7eb" />
-          <PolarAngleAxis dataKey="skill" tick={{ fill: '#374151', fontSize: 11 }} />
+          <PolarAngleAxis dataKey="skill" tick={{ fill: '#374151', fontSize: compact ? 9 : 11 }} />
           <Radar name="Your Level" dataKey="current" stroke="#4584FF" fill="#4584FF" fillOpacity={0.3} isAnimationActive />
           <Radar name="Role Required" dataKey="required" stroke="#06123C" fill="#06123C" fillOpacity={0.15} isAnimationActive />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
+          {!compact && <Legend wrapperStyle={{ fontSize: 12 }} />}
         </RadarChart>
       </ResponsiveContainer>
     </div>
