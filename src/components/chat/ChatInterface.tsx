@@ -257,35 +257,40 @@ export function ChatInterface({ threadId, onProfileUpdate, onSkillGapResult, onC
     setMessages(prev => [...prev, cvUserMsg, scanningAssistant])
     onCVUploaded({ fileName: file.name, pageCount, pageImages })
 
-    // 4. Call vision parse endpoint
+    // 4. Call vision parse endpoint — retry once on failure to survive Vercel cold starts
     let parsedCV: Partial<ParsedResumeResult & { currentSkills: Array<{ name: string; currentLevel: number }> }> = {}
-    try {
-      const res = await fetch('/api/parse-cv', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageDataUrls: pageImages, fileName: file.name })
-      })
-      if (res.ok) {
-        parsedCV = await res.json()
-        if (parsedCV.profile) onProfileUpdate(parsedCV.profile)
+    const parseBody = JSON.stringify({ imageDataUrls: pageImages, fileName: file.name })
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await fetch('/api/parse-cv', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: parseBody,
+        })
+        if (res.ok) {
+          parsedCV = await res.json()
+          if (parsedCV.profile) onProfileUpdate(parsedCV.profile)
 
-        // 5. Embed the CV markdown for vector search (fire-and-forget, non-blocking)
-        const markdown = parsedCV.markdownContent
-        if (markdown) {
-          // Save to localStorage for re-embed on refresh
-          try {
-            localStorage.setItem(`localized_cv_markdown_${threadId}`, markdown)
-          } catch {}
-          // Embed in background — don't await, agent call proceeds regardless
-          fetch('/api/embed-cv', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ markdown, threadId }),
-          }).catch(() => {})
+          // 5. Embed the CV markdown for vector search (fire-and-forget, non-blocking)
+          const markdown = parsedCV.markdownContent
+          if (markdown) {
+            // Save to localStorage for re-embed on refresh
+            try {
+              localStorage.setItem(`localized_cv_markdown_${threadId}`, markdown)
+            } catch {}
+            // Embed in background — don't await, agent call proceeds regardless
+            fetch('/api/embed-cv', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ markdown, threadId }),
+            }).catch(() => {})
+          }
+          break // success — no retry needed
         }
+      } catch {
+        // On first failure, retry immediately (cold start recovery)
+        if (attempt === 1) break // second failure — continue without CV parse
       }
-    } catch {
-      // Continue even if vision parse fails — agent will still respond
     }
 
     // 6. Build context message for agent
