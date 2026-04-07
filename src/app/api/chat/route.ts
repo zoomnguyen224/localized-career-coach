@@ -2,6 +2,9 @@ import { HumanMessage, AIMessage } from '@langchain/core/messages'
 import { createGraph } from '@/lib/graph'
 import type { SSEEvent } from '@/types'
 
+// Vercel: allow up to 60s for multi-tool agent streaming (default is 10s on Hobby)
+export const maxDuration = 60
+
 const encoder = new TextEncoder()
 
 function send(controller: ReadableStreamDefaultController, event: SSEEvent) {

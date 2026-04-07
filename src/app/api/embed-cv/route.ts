@@ -3,6 +3,9 @@ import { OpenAIEmbeddings } from '@langchain/openai'
 import { MemoryVectorStore } from 'langchain/vectorstores/memory'
 import { setVectorStore } from '@/lib/vector-store'
 
+// Vercel: allow up to 60s for embedding calls
+export const maxDuration = 60
+
 export async function POST(req: Request) {
   let body: { markdown?: string; threadId?: string }
   try {

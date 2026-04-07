@@ -4,6 +4,9 @@
  * Uses OpenRouter vision-capable model (defaults to gemini-2.0-flash-001).
  */
 
+// Vercel: allow up to 60s for vision model calls (default is 10s on Hobby)
+export const maxDuration = 60
+
 const EXTRACTION_PROMPT = `You are analyzing a CV/resume. Extract all information and return ONLY valid JSON — no markdown, no explanation:
 {
   "profile": {
