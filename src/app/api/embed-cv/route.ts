@@ -1,7 +1,7 @@
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { OpenAIEmbeddings } from '@langchain/openai'
 import { MemoryVectorStore } from 'langchain/vectorstores/memory'
-import { setVectorStore } from '@/lib/vector-store'
+import { setVectorStore, saveMarkdownToRedis } from '@/lib/vector-store'
 
 // Vercel: allow up to 60s for embedding calls
 export const maxDuration = 60
@@ -40,6 +40,9 @@ export async function POST(req: Request) {
 
   const store = await MemoryVectorStore.fromDocuments(docs, embeddings)
   setVectorStore(threadId, store)
+
+  // Persist markdown to Redis so cold-start instances can re-embed on demand
+  await saveMarkdownToRedis(threadId, markdown)
 
   return Response.json({ success: true, chunkCount: docs.length })
 }

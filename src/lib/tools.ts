@@ -1,7 +1,10 @@
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
 import { MENA_ROLES, EXPERT_NETWORK, CAREER_INSIGHTS, MENA_JOB_LISTINGS, INTERVIEW_QUESTIONS, SALARY_BENCHMARKS } from './mock-data'
-import { getVectorStore } from '@/lib/vector-store'
+import { getVectorStore, setVectorStore, getMarkdownFromRedis } from '@/lib/vector-store'
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
+import { OpenAIEmbeddings } from '@langchain/openai'
+import { MemoryVectorStore } from 'langchain/vectorstores/memory'
 import type { SkillGap, SkillGapResult, LearningPathResult, ExpertMatchResult, LearningPhase, ParsedResumeResult, CurrentSkill, JobMarketScanResult, JobMatch, InterviewQuestion, InterviewEvaluation, SalaryBenchmarkResult, SalaryRange, CertificationPremium, UserProfile } from '@/types'
 
 function findBestRole(targetRole: string) {
@@ -482,8 +485,36 @@ export const salaryBenchmarkTool = tool(
 export function createSearchResumeTool(threadId: string) {
   return tool(
     async ({ query, k = 4 }: { query: string; k?: number }) => {
-      const store = getVectorStore(threadId)
-      if (!store) return { message: 'No CV context loaded' }
+      let store = getVectorStore(threadId)
+
+      // Cold-start recovery: re-embed from Redis if in-memory store is gone
+      if (!store) {
+        const markdown = await getMarkdownFromRedis(threadId)
+        if (markdown) {
+          try {
+            const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 500, chunkOverlap: 50 })
+            const docs = await splitter.createDocuments([markdown])
+            const embeddings = new OpenAIEmbeddings({
+              modelName: process.env.OPENROUTER_EMBEDDING_MODEL ?? 'openai/text-embedding-3-small',
+              openAIApiKey: process.env.OPENROUTER_API_KEY ?? '',
+              configuration: {
+                baseURL: 'https://openrouter.ai/api/v1',
+                defaultHeaders: {
+                  'HTTP-Referer': 'https://localized.world',
+                  'X-Title': 'Localized AI Career Coach',
+                },
+              },
+            })
+            store = await MemoryVectorStore.fromDocuments(docs, embeddings)
+            setVectorStore(threadId, store)
+          } catch {
+            return { message: 'No CV context loaded' }
+          }
+        } else {
+          return { message: 'No CV context loaded' }
+        }
+      }
+
       const docs = await store.similaritySearch(query, k)
       return { chunks: docs.map(d => d.pageContent), source: 'cv' as const }
     },
