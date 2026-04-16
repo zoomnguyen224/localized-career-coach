@@ -1,6 +1,5 @@
 // src/lib/agents/job-scanner.ts
 import { Job, ATSSource, RoleCategory } from '@/types/jobs'
-import { v4 as uuidv4 } from 'uuid'
 
 function classifyRole(title: string): RoleCategory {
   const t = title.toLowerCase()
@@ -32,7 +31,7 @@ export async function fetchGreenhouseJobs(
     const data = await res.json()
     const jobs: Array<{ id: number; title: string; absolute_url: string; location?: { name?: string } }> = data.jobs ?? []
     return jobs.map(j => ({
-      id: uuidv4(),
+      id: `greenhouse::${companySlug}::${j.id}`,
       externalId: String(j.id),
       atsSource: 'greenhouse' as ATSSource,
       company: companyName,
@@ -62,7 +61,7 @@ export async function fetchLeverJobs(
     if (!res.ok) return []
     const jobs: Array<{ id: string; text: string; hostedUrl?: string; applyUrl?: string; categories?: { location?: string } }> = await res.json()
     return jobs.map(j => ({
-      id: uuidv4(),
+      id: `lever::${companySlug}::${j.id}`,
       externalId: j.id,
       atsSource: 'lever' as ATSSource,
       company: companyName,
@@ -131,7 +130,7 @@ const MENA_ATS_COMPANIES: Array<{
   slug: string; name: string; ats: 'greenhouse' | 'lever'; country: Job['country']
 }> = [
   { slug: 'careem', name: 'Careem', ats: 'lever', country: 'UAE' },
-  { slug: 'fetchrewards', name: 'Fetch', ats: 'greenhouse', country: 'UAE' },
+  { slug: 'anghami', name: 'Anghami', ats: 'greenhouse', country: 'UAE' },
 ]
 
 export async function scanAllMENAPortals(): Promise<Job[]> {
