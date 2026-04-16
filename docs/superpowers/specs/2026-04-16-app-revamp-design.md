@@ -52,7 +52,63 @@ current.page       — which page the user is on
 current.focus      — which job/application is selected (if any)
 ```
 
-### 2.4 Tech Stack (no changes to existing)
+### 2.4 Reuse Map — career-agent-cli + Localized existing assets
+
+**CRITICAL RULE: Never write a new agent prompt from scratch if one already exists in career-agent-cli `modes/` or Localized `src/lib/tools.ts`. Load the file, pass as system prompt.**
+
+#### From career-agent-cli `modes/` — load as system prompt per agent call
+
+| Agent | Source file | What it provides |
+|---|---|---|
+| Job evaluation (scoring) | `modes/oferta.md` + `modes/_shared.md` | Full A-F block scoring, archetype detection (6 types), CV-to-JD gap analysis, comp benchmarking, red flags, legitimacy check |
+| CV keyword injection | `modes/pdf.md` | Keyword extraction (15–20), summary rewrite, bullet reordering, ATS rules, paper format detection |
+| Job scanner | `modes/scan.md` | 3-level discovery: ATS APIs (Level 2) + Playwright scraping (Level 1) + WebSearch (Level 3). ATS API endpoints for Greenhouse / Lever / Ashby / BambooHR / Workday already documented |
+| LinkedIn outreach | `modes/contacto.md` | Contact classification (recruiter / hiring manager / peer), 3-sentence message framework per type |
+| Company deep research | `modes/deep.md` | 6-axis research prompt: AI strategy, recent moves, engineering culture, likely challenges, growth signals, interview intel |
+| Interview intel | `modes/interview-prep.md` | Glassdoor/Blind/LeetCode search queries, process overview, STAR story mapping |
+| Pattern analysis | `modes/patterns.md` | Rejection pattern detection across applications, filter update recommendations |
+| Follow-up timing | `modes/followup.md` + `followup-cadence.mjs` | Cadence rules per status, optimal follow-up timing |
+| Archetype + scoring rules | `modes/_shared.md` | Scoring system (1–5 scale), 6 archetypes (FDE/SA/PM/LLMOps/Agentic/Transformation), interpretation thresholds |
+| User persona | `modes/_profile.md` | User's target archetypes, narrative, negotiation stance — MENA version to be created as `modes/mena-profile.md` |
+
+#### From Localized `src/lib/tools.ts` — keep all existing LangChain tools
+
+| Tool | Keep as-is | Enhancement |
+|---|---|---|
+| `skill_gap_analysis` | ✅ yes | Feed real job requirements from ATS scan instead of mock MENA_ROLES |
+| `learning_path` | ✅ yes | No change |
+| `expert_match` | ✅ yes | No change (mock data fine for demo) |
+| `career_insight` | ✅ yes | No change |
+| `update_profile` | ✅ yes | Persist to Supabase instead of in-memory |
+| `parse_resume` | ✅ yes | No change |
+| `search_resume` | ✅ yes | No change (vector search already works) |
+| `job_market_scan` | ⚠️ replace mock | Replace mock MENA_JOB_LISTINGS with real ATS API calls using `scan.md` Level 2 logic |
+| `generate_interview_question` | ✅ yes | No change |
+| `evaluate_interview_answer` | ✅ yes | No change |
+| `salary_benchmark` | ✅ yes | No change (mock data fine for demo) |
+
+#### New tools to add (follow same LangChain pattern in `tools.ts`)
+
+| New tool | Prompt source | What it does |
+|---|---|---|
+| `evaluate_job_offer` | `modes/oferta.md` + `modes/_shared.md` | Full A-F scoring, returns structured result for Jobs page score bars |
+| `generate_tailored_cv` | `modes/pdf.md` | Keyword injection → HTML → returns HTML string for PDF conversion |
+| `draft_linkedin_outreach` | `modes/contacto.md` | Returns contact type + drafted message |
+| `research_company` | `modes/deep.md` | Returns structured 6-axis company intel |
+| `scan_mena_portals` | `modes/scan.md` Level 2 | HTTP calls to Greenhouse/Lever/Ashby, returns job list |
+| `analyze_patterns` | `modes/patterns.md` | Returns rejection pattern analysis |
+
+#### From career-agent-cli scripts — reuse logic directly
+
+| Script | Reuse how |
+|---|---|
+| `generate-pdf.mjs` | Copy into Localized as `/src/lib/generate-pdf.mjs` — called by CV generation API route |
+| `check-liveness.mjs` | Run server-side to validate job URLs before storing |
+| `merge-tracker.mjs` | Logic informs DB upsert strategy (never duplicate company+role) |
+| `templates/cv-template.html` | Copy into Localized `public/cv-template.html` — base for PDF generation |
+| `fonts/` | Copy into Localized `public/fonts/` — Space Grotesk + DM Sans for CV |
+
+### 2.5 Tech Stack (no changes to existing)
 
 - **Frontend:** Next.js (existing)
 - **AI orchestration:** LangChain tools in `src/lib/tools.ts` (existing pattern — new agents = new tools)
