@@ -32,7 +32,7 @@ export function TopMatches({ matches }: TopMatchesProps) {
   return (
     <div className="bg-white border border-[#DCDFE8] rounded-[10px] p-5 shadow-[0_5px_60px_rgba(151,155,192,0.2)]">
       <div className="flex items-center justify-between mb-4">
-        <div className="text-[10px] font-bold text-[#8D96B4] uppercase tracking-[0.08em]">Top Matches Today</div>
+        <div className="text-[10px] font-bold text-[#8D96B4] uppercase tracking-[0.08em]">Agents surfaced for you</div>
         <a href="/jobs" className="text-[11px] text-[#4584FF] font-semibold hover:underline">View all →</a>
       </div>
       <div className="flex flex-col gap-3">

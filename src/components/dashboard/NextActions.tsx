@@ -21,7 +21,7 @@ const ACTION_COLORS: Record<NextAction['type'], { bg: string; text: string; dot:
 export function NextActions({ actions }: NextActionsProps) {
   return (
     <div className="bg-white border border-[#DCDFE8] rounded-[10px] p-5 shadow-[0_5px_60px_rgba(151,155,192,0.2)]">
-      <div className="text-[10px] font-bold text-[#8D96B4] uppercase tracking-[0.08em] mb-4">Next Actions</div>
+      <div className="text-[10px] font-bold text-[#8D96B4] uppercase tracking-[0.08em] mb-4">Agents flagged for you</div>
       <div className="flex flex-col gap-2.5">
         {actions.map((action, i) => {
           const colors = ACTION_COLORS[action.type]
