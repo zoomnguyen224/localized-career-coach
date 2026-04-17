@@ -1,0 +1,64 @@
+// src/components/dashboard/TopMatches.tsx
+
+interface TopMatch {
+  company: string
+  jobTitle: string
+  location: string
+  matchScore: number
+  isNew?: boolean
+}
+
+interface TopMatchesProps {
+  matches: TopMatch[]
+}
+
+const LOGO_COLORS: Record<string, string> = {
+  NEOM: '#06123C', STC: '#00B14F', EMIR: '#D71921',
+  CARE: '#00A651', TALA: '#FF6600', GEID: '#7B2D8B',
+}
+
+function logoColor(company: string): string {
+  const key = company.slice(0, 4).toUpperCase()
+  return LOGO_COLORS[key] ?? '#4584FF'
+}
+
+function scoreColor(score: number): string {
+  if (score >= 4.0) return 'text-[#03BA82] bg-[#E6FAF4]'
+  if (score >= 3.5) return 'text-[#FAA82C] bg-[#FFF8EC]'
+  return 'text-[#F84E4E] bg-[#FFF0F0]'
+}
+
+export function TopMatches({ matches }: TopMatchesProps) {
+  return (
+    <div className="bg-white border border-[#DCDFE8] rounded-[10px] p-5 shadow-[0_5px_60px_rgba(151,155,192,0.2)]">
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-[10px] font-bold text-[#8D96B4] uppercase tracking-[0.08em]">Top Matches Today</div>
+        <a href="/jobs" className="text-[11px] text-[#4584FF] font-semibold hover:underline">View all →</a>
+      </div>
+      <div className="flex flex-col gap-3">
+        {matches.map((match, i) => (
+          <div key={i} className="flex items-center gap-3">
+            <div
+              className="w-9 h-9 rounded-lg flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
+              style={{ backgroundColor: logoColor(match.company) }}
+            >
+              {match.company.slice(0, 2).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[12px] font-bold text-[#06123C] truncate">{match.jobTitle}</div>
+              <div className="text-[10px] text-[#727998]">{match.company} · {match.location}</div>
+            </div>
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              {match.isNew && (
+                <div className="w-1.5 h-1.5 rounded-full bg-[#4584FF]" />
+              )}
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${scoreColor(match.matchScore)}`}>
+                {match.matchScore.toFixed(1)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
