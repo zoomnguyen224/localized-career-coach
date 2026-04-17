@@ -4,6 +4,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Briefcase, ClipboardList, FileText, Target, Settings } from 'lucide-react'
 
+interface AppSidebarProps {
+  onOpenChat: () => void
+}
+
 const NAV_ITEMS = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/jobs', icon: Briefcase, label: 'Jobs', badge: '12' },
@@ -12,7 +16,7 @@ const NAV_ITEMS = [
   { href: '/interview', icon: Target, label: 'Interview Prep' },
 ]
 
-export function AppSidebar() {
+export function AppSidebar({ onOpenChat }: AppSidebarProps) {
   const pathname = usePathname()
 
   return (
@@ -76,6 +80,7 @@ export function AppSidebar() {
 
       {/* Chat FAB */}
       <button
+        onClick={onOpenChat}
         className="absolute bottom-7 right-7 w-[50px] h-[50px] rounded-full bg-gradient-to-br from-[#4584FF] to-[#03BA82] flex items-center justify-center text-xl shadow-lg shadow-blue-400/30 z-50"
         title="Ask your career agent"
       >
