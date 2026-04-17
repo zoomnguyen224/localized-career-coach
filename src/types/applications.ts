@@ -17,3 +17,9 @@ export interface Application {
   offerDeadline?: string    // ISO string
   notes?: string
 }
+
+export interface FollowUpAction {
+  label: string
+  description: string
+  type: 'follow-up' | 'interview' | 'offer' | 'apply'
+}
