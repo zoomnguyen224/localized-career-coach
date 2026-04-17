@@ -3,6 +3,7 @@ import { scanAllMENAPortals } from '@/lib/agents/job-scanner'
 import { startScan, completeScan, getScanState } from '@/lib/scan-store'
 
 export async function GET(request: NextRequest) {
+  // Demo-friendly: open when CRON_SECRET is unset (local dev). Set CRON_SECRET in production.
   const secret = process.env.CRON_SECRET
   if (secret) {
     const auth = request.headers.get('authorization')
@@ -11,8 +12,8 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  startScan()
   try {
+    startScan()
     const jobs = await scanAllMENAPortals()
     completeScan(jobs)
     const { newJobsCount, totalJobsCount } = getScanState()
