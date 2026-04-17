@@ -1,6 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import Home from '@/app/page'
 
+// Mock next/navigation before importing the component
+jest.mock('next/navigation', () => ({
+  redirect: jest.fn(),
+}))
+
 jest.mock('@/components/layout/Header', () => ({
   __esModule: true,
   default: () => <div data-testid="header">Header</div>,
@@ -57,29 +62,9 @@ Object.defineProperty(global, 'crypto', {
 })
 
 describe('Home page', () => {
-  it('renders Header component', () => {
+  it('redirects to /jobs', () => {
+    const { redirect } = require('next/navigation')
     render(<Home />)
-    expect(screen.getByTestId('header')).toBeInTheDocument()
-  })
-
-  it('renders Sidebar component', () => {
-    render(<Home />)
-    expect(screen.getByTestId('sidebar')).toBeInTheDocument()
-  })
-
-  it('renders ChatInterface component', () => {
-    render(<Home />)
-    expect(screen.getByTestId('chat-interface')).toBeInTheDocument()
-  })
-
-  it('passes activeThreadId to ChatInterface', () => {
-    render(<Home />)
-    expect(screen.getByTestId('chat-interface')).toHaveAttribute('data-thread-id', 'test-thread-id')
-  })
-
-  it('updates userProfile state when onProfileUpdate is called', () => {
-    render(<Home />)
-    fireEvent.click(screen.getByRole('button', { name: 'Update Profile' }))
-    expect(screen.getByTestId('chat-interface')).toBeInTheDocument()
+    expect(redirect).toHaveBeenCalledWith('/jobs')
   })
 })

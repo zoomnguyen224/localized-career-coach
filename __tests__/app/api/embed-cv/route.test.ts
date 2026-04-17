@@ -18,6 +18,8 @@ jest.mock('@/lib/vector-store', () => ({
   setVectorStore: jest.fn(),
   getVectorStore: jest.fn(),
   clearVectorStore: jest.fn(),
+  saveMarkdownToRedis: jest.fn(),
+  getMarkdownFromRedis: jest.fn(),
 }))
 
 import { POST } from '@/app/api/embed-cv/route'

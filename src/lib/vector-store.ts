@@ -11,6 +11,10 @@ export function setVectorStore(threadId: string, store: MemoryVectorStore): void
   stores.set(threadId, store)
 }
 
+export function clearVectorStore(threadId: string): void {
+  stores.delete(threadId)
+}
+
 // ---------------------------------------------------------------------------
 // Redis persistence — survives cold starts
 // ---------------------------------------------------------------------------
