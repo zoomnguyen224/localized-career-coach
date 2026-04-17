@@ -62,9 +62,9 @@ Object.defineProperty(global, 'crypto', {
 })
 
 describe('Home page', () => {
-  it('redirects to /jobs', () => {
+  it('redirects to /dashboard', () => {
     const { redirect } = require('next/navigation')
     render(<Home />)
-    expect(redirect).toHaveBeenCalledWith('/jobs')
+    expect(redirect).toHaveBeenCalledWith('/dashboard')
   })
 })
