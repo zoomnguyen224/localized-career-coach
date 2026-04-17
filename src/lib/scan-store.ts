@@ -23,13 +23,18 @@ export function getScanState(): ScanState {
 }
 
 export function getStoredJobs(): Job[] {
-  return store.jobs
+  return [...store.jobs]
 }
 
 export function startScan(): void {
   store.isScanning = true
 }
 
+/**
+ * Replaces the entire stored job list with the new scan results.
+ * Caller must always pass the COMPLETE set of jobs — partial results
+ * will discard previously stored jobs not included in this call.
+ */
 export function completeScan(jobs: Job[]): void {
   const prevIds = new Set(store.jobs.map(j => j.id))
   store.newJobsCount = jobs.filter(j => !prevIds.has(j.id)).length

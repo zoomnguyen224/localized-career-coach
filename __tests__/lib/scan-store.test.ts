@@ -18,6 +18,7 @@ describe('scan-store', () => {
     expect(state.isScanning).toBe(false)
     expect(state.lastScanAt).toBeNull()
     expect(state.totalJobsCount).toBe(0)
+    expect(state.newJobsCount).toBe(0)
   })
 
   it('startScan sets isScanning true', () => {
