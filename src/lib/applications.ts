@@ -133,3 +133,40 @@ export const DEMO_APPLICATIONS: Application[] = [
     lastActivity: d(5), alertType: null,
   },
 ]
+
+// ─── Live store (mutable, demo-only, not persisted) ───────────────
+
+let liveApplications: Application[] = [...DEMO_APPLICATIONS]
+
+export function getAllApplications(): Application[] {
+  return liveApplications
+}
+
+export function isDuplicate(company: string, jobTitle: string): boolean {
+  return liveApplications.some(
+    a =>
+      a.company.toLowerCase() === company.toLowerCase() &&
+      a.jobTitle.toLowerCase() === jobTitle.toLowerCase()
+  )
+}
+
+export function appendApplication(
+  data: Pick<Application, 'company' | 'jobTitle' | 'matchScore'>
+): Application {
+  const app: Application = {
+    id: crypto.randomUUID(),
+    company: data.company,
+    jobTitle: data.jobTitle,
+    matchScore: data.matchScore,
+    status: 'applied',
+    appliedAt: new Date().toISOString(),
+    lastActivity: new Date().toISOString(),
+    alertType: null,
+  }
+  liveApplications = [...liveApplications, app]
+  return app
+}
+
+export function resetApplicationsForTest(): void {
+  liveApplications = [...DEMO_APPLICATIONS]
+}
