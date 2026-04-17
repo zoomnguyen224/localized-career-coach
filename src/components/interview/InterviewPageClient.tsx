@@ -2,14 +2,24 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import type { InterviewSession } from '@/types/interview'
 import { DEMO_SESSIONS, DEMO_QUESTIONS, DEMO_STAR_STORIES, DEMO_COMPANY_PROCESS } from '@/lib/interview'
 import { InterviewSessionPanel } from './InterviewSessionPanel'
 
 export function InterviewPageClient() {
-  const [activeSession, setActiveSession] = useState<InterviewSession | null>(
-    DEMO_SESSIONS[0] ?? null
-  )
+  const searchParams = useSearchParams()
+  const companyParam = searchParams.get('company') || undefined
+
+  const [activeSession, setActiveSession] = useState<InterviewSession | null>(() => {
+    if (companyParam) {
+      const match = DEMO_SESSIONS.find(
+        s => s.company.toLowerCase() === companyParam.toLowerCase()
+      )
+      if (match) return match
+    }
+    return DEMO_SESSIONS[0] ?? null
+  })
 
   return (
     <div className="flex h-full">
