@@ -34,8 +34,6 @@ export function CVPreview({ masterCvMarkdown, activeCV, onGenerate, isGenerating
     if (!jobTitle.trim() || !company.trim() || !jobDescription.trim()) return
     await onGenerate(jobTitle, company, jobDescription)
     setShowForm(false)
-    setJobTitle('')
-    setCompany('')
     setJobDescription('')
   }
 

@@ -56,8 +56,8 @@ Python, LangChain, LlamaIndex, FastAPI, Docker, Kubernetes, AWS, Arabic NLP, RAG
 
 export function CVPageClient() {
   const searchParams = useSearchParams()
-  const initialJobTitle = searchParams.get('jobTitle') ?? undefined
-  const initialCompany = searchParams.get('company') ?? undefined
+  const initialJobTitle = searchParams.get('jobTitle') || undefined
+  const initialCompany = searchParams.get('company') || undefined
   const [generatedCVs, setGeneratedCVs] = useState<GeneratedCV[]>([])
   const [activeCV, setActiveCV] = useState<GeneratedCV | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)

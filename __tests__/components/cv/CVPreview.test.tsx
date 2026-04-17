@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { CVPreview } from '@/components/cv/CVPreview'
 
 const noop = async () => {}
@@ -48,5 +49,30 @@ describe('CVPreview URL pre-fill', () => {
       />
     )
     expect(screen.queryByPlaceholderText('Job title')).not.toBeInTheDocument()
+  })
+
+  it('retains jobTitle and company after successful submission', async () => {
+    const mockGenerate = jest.fn().mockResolvedValue(undefined)
+    render(
+      <CVPreview
+        masterCvMarkdown="# Test"
+        activeCV={null}
+        onGenerate={mockGenerate}
+        isGenerating={false}
+        initialJobTitle="AI Engineer"
+        initialCompany="NEOM"
+      />
+    )
+
+    // Fill in job description
+    const textarea = screen.getByPlaceholderText('Paste job description here...')
+    await userEvent.type(textarea, 'Some job description')
+
+    // Submit
+    const submitBtn = screen.getByRole('button', { name: /generate with agent/i })
+    await userEvent.click(submitBtn)
+
+    // Wait for generate to be called
+    expect(mockGenerate).toHaveBeenCalledWith('AI Engineer', 'NEOM', 'Some job description')
   })
 })
