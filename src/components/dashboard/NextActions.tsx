@@ -13,14 +13,14 @@ interface NextActionsProps {
 
 const ACTION_COLORS: Record<NextAction['type'], { bg: string; text: string; dot: string }> = {
   'follow-up': { bg: '#FFF8EC', text: '#FAA82C', dot: '#FAA82C' },
-  'interview':  { bg: '#ECF3FF', text: '#4584FF', dot: '#4584FF' },
+  'interview':  { bg: '#e8f0fe', text: '#0052ff', dot: '#0052ff' },
   'offer':      { bg: '#E6FAF4', text: '#03BA82', dot: '#03BA82' },
-  'apply':      { bg: '#F2F3F6', text: '#727998', dot: '#727998' },
+  'apply':      { bg: '#eef0f3', text: '#727998', dot: '#727998' },
 }
 
 export function NextActions({ actions }: NextActionsProps) {
   return (
-    <div className="bg-white border border-[#DCDFE8] rounded-[10px] p-5 shadow-[0_5px_60px_rgba(151,155,192,0.2)]">
+    <div className="bg-white border border-[#d8dbe4] rounded-[10px] p-5 shadow-[0_5px_60px_rgba(151,155,192,0.2)]">
       <div className="text-[10px] font-bold text-[#8D96B4] uppercase tracking-[0.08em] mb-4">Agents flagged for you</div>
       <div className="flex flex-col gap-2.5">
         {actions.map((action, i) => {

@@ -66,7 +66,7 @@ export function ScannerStatus({ onScanComplete }: ScannerStatusProps) {
         onClick={handleScanNow}
         disabled={state.isScanning}
         aria-label="Scan for new jobs now"
-        className="flex items-center gap-2 bg-[#F2F3F6] px-3 py-1.5 rounded-full hover:bg-[#EAECF2] transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+        className="flex items-center gap-2 bg-[#eef0f3] px-3 py-1.5 rounded-full hover:bg-[#578bfa] hover:text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
       >
         <div
           className={`w-1.5 h-1.5 rounded-full animate-pulse ${

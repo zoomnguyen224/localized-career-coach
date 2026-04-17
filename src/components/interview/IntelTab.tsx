@@ -41,11 +41,11 @@ export function IntelTab({ company }: IntelTabProps) {
       {sections.map(section => (
         <div
           key={section.title}
-          className="bg-white border border-[#DCDFE8] rounded-[10px] p-4 shadow-[0_2px_12px_rgba(151,155,192,0.08)]"
+          className="bg-white border border-[#d8dbe4] rounded-[10px] p-4 shadow-[0_2px_12px_rgba(151,155,192,0.08)]"
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[14px]">{section.icon}</span>
-            <span className="text-[11px] font-bold text-[#06123C]">{section.title}</span>
+            <span className="text-[11px] font-bold text-[#0a0b0d]">{section.title}</span>
           </div>
           <p className="text-[11px] text-[#727998] leading-relaxed">{section.content}</p>
         </div>

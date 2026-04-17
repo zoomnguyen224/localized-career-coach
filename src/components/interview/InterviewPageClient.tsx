@@ -14,9 +14,9 @@ export function InterviewPageClient() {
   return (
     <div className="flex h-full">
       {/* Left column — session list */}
-      <div className="w-[280px] flex-shrink-0 border-r border-[#DCDFE8] flex flex-col">
-        <div className="px-5 pt-6 pb-4 border-b border-[#DCDFE8] flex-shrink-0">
-          <h1 className="text-[15px] font-extrabold text-[#06123C]">Interview Prep</h1>
+      <div className="w-[280px] flex-shrink-0 border-r border-[#d8dbe4] flex flex-col">
+        <div className="px-5 pt-6 pb-4 border-b border-[#d8dbe4] flex-shrink-0">
+          <h1 className="text-[15px] font-extrabold text-[#0a0b0d]">Interview Prep</h1>
           <p className="text-[11px] text-[#727998] mt-0.5">{DEMO_SESSIONS.length} upcoming</p>
         </div>
 
@@ -28,8 +28,8 @@ export function InterviewPageClient() {
               onClick={() => setActiveSession(session)}
               className={`w-full text-left px-3 py-3 rounded-[10px] mb-1.5 transition-colors ${
                 activeSession?.id === session.id
-                  ? 'bg-[#ECF3FF]'
-                  : 'hover:bg-[#F2F3F6]'
+                  ? 'bg-[#e8f0fe]'
+                  : 'hover:bg-[#eef0f3]'
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -37,7 +37,7 @@ export function InterviewPageClient() {
                   {session.company.slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className={`text-[12px] font-bold truncate ${activeSession?.id === session.id ? 'text-[#4584FF]' : 'text-[#06123C]'}`}>
+                  <div className={`text-[12px] font-bold truncate ${activeSession?.id === session.id ? 'text-[#0052ff]' : 'text-[#0a0b0d]'}`}>
                     {session.company}
                   </div>
                   <div className="text-[10px] text-[#727998] truncate">{session.role}</div>
@@ -57,9 +57,9 @@ export function InterviewPageClient() {
             </div>
           )}
 
-          <div className="h-px bg-[#DCDFE8] my-3" />
+          <div className="h-px bg-[#d8dbe4] my-3" />
 
-          <button className="w-full text-[11px] font-semibold text-[#4584FF] text-center py-2 hover:underline">
+          <button className="w-full text-[11px] font-semibold text-[#0052ff] text-center py-2 hover:underline">
             + Prep for a new role
           </button>
         </div>

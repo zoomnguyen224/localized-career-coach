@@ -46,7 +46,7 @@ export function scoreColorClass(score: number): string {
 }
 
 export function cardLeftBorderClass(alertType: AlertType, status: ApplicationStatus): string {
-  if (alertType === 'interview') return 'border-l-[#4584FF]'
+  if (alertType === 'interview') return 'border-l-[#0052ff]'
   if (alertType === 'follow-up' || alertType === 'deadline') return 'border-l-[#FAA82C]'
   if (status === 'offer') return 'border-l-[#03BA82]'
   return 'border-l-transparent'
@@ -67,8 +67,8 @@ export const COLUMNS: Array<{
   color: string
   headerBg: string
 }> = [
-  { status: 'evaluated', label: 'Evaluated', color: '#727998', headerBg: '#F2F3F6' },
-  { status: 'applied',   label: 'Applied',   color: '#4584FF', headerBg: '#ECF3FF' },
+  { status: 'evaluated', label: 'Evaluated', color: '#727998', headerBg: '#eef0f3' },
+  { status: 'applied',   label: 'Applied',   color: '#0052ff', headerBg: '#e8f0fe' },
   { status: 'interview', label: 'Interview', color: '#FAA82C', headerBg: '#FFF8EC' },
   { status: 'offer',     label: 'Offer',     color: '#03BA82', headerBg: '#E6FAF4' },
   { status: 'rejected',  label: 'Rejected',  color: '#F84E4E', headerBg: '#FFF0F0' },

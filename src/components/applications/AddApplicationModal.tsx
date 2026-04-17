@@ -31,14 +31,14 @@ export function AddApplicationModal({ onAdd, onClose }: AddApplicationModalProps
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
       <div className="bg-white rounded-[10px] p-6 w-[380px] shadow-[0_20px_60px_rgba(0,0,0,0.15)]">
-        <div className="text-[14px] font-extrabold text-[#06123C] mb-4">Add Application</div>
+        <div className="text-[14px] font-extrabold text-[#0a0b0d] mb-4">Add Application</div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
             type="text"
             placeholder="Company"
             value={company}
             onChange={e => setCompany(e.target.value)}
-            className="border border-[#DCDFE8] rounded-[10px] px-3 py-2 text-[12px] text-[#06123C] placeholder:text-[#8D96B4] outline-none focus:border-[#4584FF]"
+            className="border border-[#d8dbe4] rounded-[10px] px-3 py-2 text-[12px] text-[#0a0b0d] placeholder:text-[#8D96B4] outline-none focus:border-[#0052ff]"
             required
             autoFocus
           />
@@ -47,7 +47,7 @@ export function AddApplicationModal({ onAdd, onClose }: AddApplicationModalProps
             placeholder="Job title"
             value={jobTitle}
             onChange={e => setJobTitle(e.target.value)}
-            className="border border-[#DCDFE8] rounded-[10px] px-3 py-2 text-[12px] text-[#06123C] placeholder:text-[#8D96B4] outline-none focus:border-[#4584FF]"
+            className="border border-[#d8dbe4] rounded-[10px] px-3 py-2 text-[12px] text-[#0a0b0d] placeholder:text-[#8D96B4] outline-none focus:border-[#0052ff]"
             required
           />
           <div className="flex gap-3">
@@ -60,7 +60,7 @@ export function AddApplicationModal({ onAdd, onClose }: AddApplicationModalProps
                 max="5"
                 value={matchScore}
                 onChange={e => setMatchScore(e.target.value)}
-                className="w-full border border-[#DCDFE8] rounded-[10px] px-3 py-2 text-[12px] text-[#06123C] outline-none focus:border-[#4584FF]"
+                className="w-full border border-[#d8dbe4] rounded-[10px] px-3 py-2 text-[12px] text-[#0a0b0d] outline-none focus:border-[#0052ff]"
               />
             </div>
             <div className="flex-1">
@@ -68,7 +68,7 @@ export function AddApplicationModal({ onAdd, onClose }: AddApplicationModalProps
               <select
                 value={status}
                 onChange={e => setStatus(e.target.value as ApplicationStatus)}
-                className="w-full border border-[#DCDFE8] rounded-[10px] px-3 py-2 text-[12px] text-[#06123C] outline-none focus:border-[#4584FF] bg-white"
+                className="w-full border border-[#d8dbe4] rounded-[10px] px-3 py-2 text-[12px] text-[#0a0b0d] outline-none focus:border-[#0052ff] bg-white"
               >
                 <option value="evaluated">Evaluated</option>
                 <option value="applied">Applied</option>
@@ -88,7 +88,7 @@ export function AddApplicationModal({ onAdd, onClose }: AddApplicationModalProps
             </button>
             <button
               type="submit"
-              className="bg-[#4584FF] text-white text-[12px] font-bold px-5 py-2 rounded-[14px]"
+              className="bg-[#0052ff] text-white text-[12px] font-bold px-5 py-2 rounded-[14px]"
             >
               Add
             </button>

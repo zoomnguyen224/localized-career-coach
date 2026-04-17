@@ -24,12 +24,12 @@ export function FilterBar({ filters, totalCount, onChange }: FilterBarProps) {
       active
         ? variant === 'green'
           ? 'bg-[#E6FAF4] border-[#03BA82] text-[#009C6C]'
-          : 'bg-[#ECF3FF] border-[#4584FF] text-[#4584FF]'
-        : 'bg-white border-[#DCDFE8] text-[#727998] hover:border-[#4584FF] hover:text-[#4584FF]'
+          : 'bg-[#e8f0fe] border-[#0052ff] text-[#0052ff]'
+        : 'bg-white border-[#d8dbe4] text-[#727998] hover:border-[#0052ff] hover:text-[#0052ff]'
     }`
 
   return (
-    <div className="flex items-center gap-2.5 px-7 py-4 border-b border-[#DCDFE8] flex-wrap">
+    <div className="flex items-center gap-2.5 px-7 py-4 border-b border-[#d8dbe4] flex-wrap">
       {CATEGORIES.map(cat => (
         <button
           key={cat.value}
@@ -40,7 +40,7 @@ export function FilterBar({ filters, totalCount, onChange }: FilterBarProps) {
         </button>
       ))}
 
-      <div className="w-px h-5 bg-[#DCDFE8] flex-shrink-0" />
+      <div className="w-px h-5 bg-[#d8dbe4] flex-shrink-0" />
 
       <button
         className={chip(filters.minScore === 4.0, () => {}, 'Strong match (4.0+)', 'green')}

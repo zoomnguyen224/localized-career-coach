@@ -57,7 +57,7 @@ export function JobsPageClient({ initialJobs }: JobsPageClientProps) {
       {/* Page header */}
       <div className="px-7 pt-6 pb-4 flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-xl font-extrabold text-[#06123C]">Job Matches</h1>
+          <h1 className="text-xl font-extrabold text-[#0a0b0d]">Job Matches</h1>
           <p className="text-[12px] text-[#727998] mt-0.5">
             Agent-scanned from Greenhouse, Lever, Ashby · MENA companies
           </p>
@@ -65,7 +65,7 @@ export function JobsPageClient({ initialJobs }: JobsPageClientProps) {
         <button
           onClick={refreshJobs}
           disabled={isScanning}
-          className="flex items-center gap-2 bg-[#ECF3FF] border border-[#DCE8FF] text-[#4584FF] text-[12px] font-semibold px-3.5 py-1.5 rounded-full"
+          className="flex items-center gap-2 bg-[#e8f0fe] border border-[#d0e4ff] text-[#0052ff] text-[12px] font-semibold px-3.5 py-1.5 rounded-full"
         >
           {isScanning ? (
             <><div className="w-1.5 h-1.5 rounded-full bg-[#03BA82] animate-pulse" /> Scanning…</>
@@ -81,7 +81,7 @@ export function JobsPageClient({ initialJobs }: JobsPageClientProps) {
       {/* Two-panel body */}
       <div className="flex flex-1 overflow-hidden">
         {/* Job list */}
-        <div className="w-[360px] flex-shrink-0 overflow-y-auto border-r border-[#DCDFE8] bg-[#F8F9FB]">
+        <div className="w-[360px] flex-shrink-0 overflow-y-auto border-r border-[#d8dbe4] bg-[#F8F9FB]">
           <JobList jobs={filteredJobs} selectedJobId={selectedJob?.id ?? null} onSelect={setSelectedJob} />
         </div>
 

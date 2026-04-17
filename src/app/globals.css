@@ -5,14 +5,16 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-navy: #06123C;
-  --color-blue: #4584FF;
-  --color-teal: #4584FF;
+  --color-navy: #0a0b0d;
+  --color-blue: #0052ff;
+  --color-blue-hover: #578bfa;
+  --color-teal: #0052ff;
   --color-green: #03BA82;
-  --color-bg: #F8F9FB;
+  --color-bg: #f7f8fa;
   --color-card: #FFFFFF;
-  --color-border: #DCDFE8;
-  --color-muted: #374151;
+  --color-border: #d8dbe4;
+  --color-surface: #eef0f3;
+  --color-muted: #5b616e;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -130,7 +132,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #F8F9FB;
+    background-color: #f7f8fa;
     font-family: 'Figtree', sans-serif;
   }
   html {

@@ -58,7 +58,7 @@ export function DashboardClient() {
       {/* Page header */}
       <div className="px-7 pt-6 pb-4 flex-shrink-0 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-extrabold text-[#06123C]">Your AI Command Center</h1>
+          <h1 className="text-xl font-extrabold text-[#0a0b0d]">Your AI Command Center</h1>
           <p className="text-[12px] text-[#727998] mt-0.5">
             Good morning, Ahmed — your agents worked overnight. Here&apos;s what they found.
           </p>
@@ -73,7 +73,7 @@ export function DashboardClient() {
             label="Matches Found by Agents"
             value={jobMatchCount}
             subtitle={newTodayCount > 0 ? `${newTodayCount} new since last scan` : 'Run scan to refresh'}
-            valueColor="#4584FF"
+            valueColor="#0052ff"
           />
           <StatCard
             label="Applications Sent"
