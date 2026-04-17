@@ -49,3 +49,10 @@ export interface FilterState {
   remoteOnly: boolean
   countries: Array<'UAE' | 'KSA' | 'Qatar' | 'Kuwait' | 'Bahrain' | 'Oman'>
 }
+
+export interface ScanState {
+  lastScanAt: string | null   // ISO string or null if never scanned
+  newJobsCount: number         // jobs added since previous scan
+  totalJobsCount: number       // total jobs in store
+  isScanning: boolean
+}
