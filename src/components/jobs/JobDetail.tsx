@@ -28,11 +28,12 @@ type EvalState =
 export function JobDetail({ job, cvMarkdown }: JobDetailProps) {
   const [evalState, setEvalState] = useState<EvalState>({ status: 'idle' })
   const router = useRouter()
-  const [applied, setApplied] = useState(false)
+  const [applyState, setApplyState] = useState<'idle' | 'loading' | 'done'>('idle')
   const logoColor = LOGO_COLORS[job.company] ?? 'bg-[#eef0f3] text-[#727998]'
 
   async function handleMarkApplied() {
-    if (applied) return
+    if (applyState !== 'idle') return
+    setApplyState('loading')
     try {
       const res = await fetch('/api/applications', {
         method: 'POST',
@@ -44,9 +45,10 @@ export function JobDetail({ job, cvMarkdown }: JobDetailProps) {
         }),
       })
       // 409 means already tracked — still show as applied
-      if (res.ok || res.status === 409) setApplied(true)
+      if (res.ok || res.status === 409) setApplyState('done')
+      else setApplyState('idle')
     } catch {
-      // silently ignore in demo context
+      setApplyState('idle')
     }
   }
 
@@ -162,7 +164,7 @@ export function JobDetail({ job, cvMarkdown }: JobDetailProps) {
           className="w-full flex items-center gap-3 p-3 rounded-lg border border-[#d8dbe4] mb-2 hover:border-[#0052ff] hover:bg-[#f5f8ff] transition-all cursor-pointer text-left"
         >
           <div className="w-[30px] h-[30px] rounded-lg bg-[#e8f0fe] flex items-center justify-center flex-shrink-0">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0052ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0052ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
               <line x1="16" y1="13" x2="8" y2="13"/>
@@ -173,17 +175,17 @@ export function JobDetail({ job, cvMarkdown }: JobDetailProps) {
             <div className="text-[12px] font-bold text-[#0a0b0d]">Generate tailored CV</div>
             <div className="text-[11px] text-[#727998] mt-0.5">Opens CV page with this job pre-filled</div>
           </div>
-          <span className="text-[#d8dbe4] text-sm">›</span>
+          <span aria-hidden="true" className="text-[#d8dbe4] text-sm">›</span>
         </button>
 
         {/* Mark as applied */}
         <button
           onClick={handleMarkApplied}
-          disabled={applied}
+          disabled={applyState !== 'idle'}
           className="w-full flex items-center gap-3 p-3 rounded-lg border mb-2 transition-all cursor-pointer text-left disabled:cursor-default border-[#d8dbe4] hover:border-[#03BA82] hover:bg-[#f0fdf8] disabled:hover:border-[#d8dbe4] disabled:hover:bg-white"
         >
           <div className="w-[30px] h-[30px] rounded-lg bg-[#e6faf4] flex items-center justify-center flex-shrink-0">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#03BA82" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#03BA82" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
           </div>
@@ -191,9 +193,9 @@ export function JobDetail({ job, cvMarkdown }: JobDetailProps) {
             <div className="text-[12px] font-bold text-[#0a0b0d]">Mark as applied</div>
             <div className="text-[11px] text-[#727998] mt-0.5">Auto-adds to Applications tracker</div>
           </div>
-          {applied
+          {applyState === 'done'
             ? <span className="bg-[#e6faf4] text-[#03BA82] text-[10px] font-bold px-2 py-0.5 rounded-full">Applied</span>
-            : <span className="text-[#d8dbe4] text-sm">›</span>
+            : <span aria-hidden="true" className="text-[#d8dbe4] text-sm">›</span>
           }
         </button>
 
@@ -203,7 +205,7 @@ export function JobDetail({ job, cvMarkdown }: JobDetailProps) {
           className="w-full flex items-center gap-3 p-3 rounded-lg border border-[#d8dbe4] mb-2 hover:border-[#0052ff] hover:bg-[#f5f8ff] transition-all cursor-pointer text-left"
         >
           <div className="w-[30px] h-[30px] rounded-lg bg-[#fff8ec] flex items-center justify-center flex-shrink-0">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FAA82C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FAA82C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"/>
               <line x1="12" y1="8" x2="12" y2="12"/>
               <line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -213,15 +215,16 @@ export function JobDetail({ job, cvMarkdown }: JobDetailProps) {
             <div className="text-[12px] font-bold text-[#0a0b0d]">Interview prep</div>
             <div className="text-[11px] text-[#727998] mt-0.5">Opens Interview page for {job.company}</div>
           </div>
-          <span className="text-[#d8dbe4] text-sm">›</span>
+          <span aria-hidden="true" className="text-[#d8dbe4] text-sm">›</span>
         </button>
 
         {/* Draft outreach */}
         <button
-          className="w-full flex items-center gap-3 p-3 rounded-lg border border-[#d8dbe4] hover:border-[#0052ff] hover:bg-[#f5f8ff] transition-all cursor-pointer text-left"
+          disabled
+          className="w-full flex items-center gap-3 p-3 rounded-lg border border-[#d8dbe4] opacity-60 cursor-not-allowed text-left"
         >
           <div className="w-[30px] h-[30px] rounded-lg bg-[#eef0f3] flex items-center justify-center flex-shrink-0">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#727998" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#727998" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
           </div>
@@ -229,7 +232,7 @@ export function JobDetail({ job, cvMarkdown }: JobDetailProps) {
             <div className="text-[12px] font-bold text-[#0a0b0d]">Draft outreach message</div>
             <div className="text-[11px] text-[#727998] mt-0.5">Ask AI coach to write a LinkedIn message</div>
           </div>
-          <span className="text-[#d8dbe4] text-sm">›</span>
+          <span className="bg-[#eef0f3] text-[#8D96B4] text-[10px] font-semibold px-2 py-0.5 rounded-full">Soon</span>
         </button>
       </div>
     </div>
