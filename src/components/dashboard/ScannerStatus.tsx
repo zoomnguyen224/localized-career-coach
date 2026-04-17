@@ -9,12 +9,14 @@ interface ScannerStatusProps {
 
 function timeSinceScan(iso: string | null): string {
   if (!iso) return 'Never scanned'
-  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
+  const date = new Date(iso)
+  if (isNaN(date.getTime())) return 'Never scanned'
+  const mins = Math.floor((Date.now() - date.getTime()) / 60000)
   if (mins < 1) return 'Just now'
-  if (mins < 60) return `${mins}m ago`
+  if (mins < 60) return `Scanned ${mins}m ago`
   const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours}h ago`
-  return `${Math.floor(hours / 24)}d ago`
+  if (hours < 24) return `Scanned ${hours}h ago`
+  return `Scanned ${Math.floor(hours / 24)}d ago`
 }
 
 const INITIAL_STATE: ScanState = {
@@ -32,7 +34,7 @@ export function ScannerStatus({ onScanComplete }: ScannerStatusProps) {
       const res = await fetch('/api/scan-status')
       if (res.ok) setState(await res.json())
     } catch {
-      // silently ignore — demo environment may not have network
+      setState(s => s.isScanning ? { ...s, isScanning: false } : s)
     }
   }, [])
 
@@ -58,12 +60,13 @@ export function ScannerStatus({ onScanComplete }: ScannerStatusProps) {
   return (
     <div className="flex items-center gap-3">
       <span className="text-[10px] text-[#ABAFC2]">
-        {state.isScanning ? 'Scanning now...' : `Scanned ${timeSinceScan(state.lastScanAt)}`}
+        {state.isScanning ? 'Scanning now...' : timeSinceScan(state.lastScanAt)}
       </span>
       <button
         onClick={handleScanNow}
         disabled={state.isScanning}
-        className="flex items-center gap-2 bg-[#F2F3F6] px-3 py-1.5 rounded-full hover:bg-[#EAECF2] transition-colors disabled:opacity-60 cursor-pointer"
+        aria-label="Scan for new jobs now"
+        className="flex items-center gap-2 bg-[#F2F3F6] px-3 py-1.5 rounded-full hover:bg-[#EAECF2] transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
       >
         <div
           className={`w-1.5 h-1.5 rounded-full animate-pulse ${
