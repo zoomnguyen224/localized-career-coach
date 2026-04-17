@@ -35,4 +35,15 @@ describe('htmlToPdf', () => {
     await expect(htmlToPdf('<html/>')).rejects.toThrow('render error')
     expect(mockClose).toHaveBeenCalledTimes(1)
   })
+
+  it('rewrites relative ./fonts/ paths to absolute file:// URIs', async () => {
+    let capturedHtml = ''
+    mockSetContent.mockImplementationOnce(async (html: string) => {
+      capturedHtml = html
+    })
+    await htmlToPdf("<style>src: url('./fonts/space-grotesk.woff2')</style>")
+    expect(capturedHtml).not.toContain("url('./fonts/")
+    expect(capturedHtml).toContain('url(\'file://')
+    expect(capturedHtml).toContain('space-grotesk.woff2')
+  })
 })
