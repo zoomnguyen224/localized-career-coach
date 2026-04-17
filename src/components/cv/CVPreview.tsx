@@ -9,6 +9,8 @@ interface CVPreviewProps {
   activeCV: GeneratedCV | null
   onGenerate: (jobTitle: string, company: string, jobDescription: string) => Promise<void>
   isGenerating: boolean
+  initialJobTitle?: string
+  initialCompany?: string
 }
 
 function markdownToHtml(md: string): string {
@@ -21,11 +23,11 @@ function markdownToHtml(md: string): string {
     .replace(/\n\n+/g, '</p><p>')
 }
 
-export function CVPreview({ masterCvMarkdown, activeCV, onGenerate, isGenerating }: CVPreviewProps) {
-  const [jobTitle, setJobTitle] = useState('')
-  const [company, setCompany] = useState('')
+export function CVPreview({ masterCvMarkdown, activeCV, onGenerate, isGenerating, initialJobTitle, initialCompany }: CVPreviewProps) {
+  const [jobTitle, setJobTitle] = useState(initialJobTitle ?? '')
+  const [company, setCompany] = useState(initialCompany ?? '')
   const [jobDescription, setJobDescription] = useState('')
-  const [showForm, setShowForm] = useState(false)
+  const [showForm, setShowForm] = useState(!!initialJobTitle)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

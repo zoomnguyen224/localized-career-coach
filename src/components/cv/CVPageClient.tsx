@@ -2,6 +2,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { v4 as uuidv4 } from 'uuid'
 import { GeneratedCV } from '@/types/cv'
 import { ProfileColumn } from './ProfileColumn'
@@ -54,6 +55,9 @@ BSc Computer Engineering — Cairo University (2017)
 Python, LangChain, LlamaIndex, FastAPI, Docker, Kubernetes, AWS, Arabic NLP, RAG, LLM fine-tuning, Pinecone, Weaviate, PyTorch, Transformers`
 
 export function CVPageClient() {
+  const searchParams = useSearchParams()
+  const initialJobTitle = searchParams.get('jobTitle') ?? undefined
+  const initialCompany = searchParams.get('company') ?? undefined
   const [generatedCVs, setGeneratedCVs] = useState<GeneratedCV[]>([])
   const [activeCV, setActiveCV] = useState<GeneratedCV | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -123,6 +127,8 @@ export function CVPageClient() {
           activeCV={activeCV}
           onGenerate={handleGenerate}
           isGenerating={isGenerating}
+          initialJobTitle={initialJobTitle}
+          initialCompany={initialCompany}
         />
         <GeneratedCVList
           cvs={generatedCVs}
