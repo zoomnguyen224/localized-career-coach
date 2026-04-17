@@ -33,3 +33,8 @@ it('returns 400 when company is missing', async () => {
   const res = await POST(makeRequest({ jobTitle: 'CTO' }))
   expect(res.status).toBe(400)
 })
+
+it('returns 400 when jobTitle is missing', async () => {
+  const res = await POST(makeRequest({ company: 'Acme' }))
+  expect(res.status).toBe(400)
+})
