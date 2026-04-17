@@ -38,10 +38,19 @@ function createMockStream(lines: string[]) {
 }
 
 function mockFetch(lines: string[]) {
-  (global.fetch as jest.Mock).mockResolvedValueOnce({
-    ok: true,
-    body: createMockStream(lines)
-  })
+  // Mock both /api/title (first call, fire-and-forget) and /api/chat (second call, main stream)
+  const fetchMock = global.fetch as jest.Mock
+  // Chain the mocks: first call gets title response, second call gets chat stream
+  fetchMock
+    .mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ title: '' }),
+      body: null,
+    })
+    .mockResolvedValueOnce({
+      ok: true,
+      body: createMockStream(lines)
+    })
 }
 
 const defaultProps = {
@@ -211,8 +220,8 @@ describe('ChatInterface', () => {
       expect(screen.getByTestId('send-button')).not.toBeDisabled()
     })
 
-    // Fetch was called - stream was processed without error
-    expect(global.fetch).toHaveBeenCalledTimes(1)
+    // Fetch was called twice: once for /api/title, once for /api/chat
+    expect(global.fetch).toHaveBeenCalledTimes(2)
   })
 
   test('6. Calls onProfileUpdate when update_profile tool result arrives', async () => {
