@@ -194,3 +194,4 @@ export interface SalaryBenchmarkResult {
 
 export * from './jobs'
 export * from './cv'
+export * from './applications'
