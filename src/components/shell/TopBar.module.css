@@ -1,0 +1,88 @@
+.topbar {
+  display: grid;
+  grid-template-columns: 260px 1fr 260px;
+  align-items: center;
+  padding: 0 32px;
+  height: 64px;
+  border-bottom: 1px solid var(--brand-line);
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--brand-navy);
+}
+.brandMark {
+  width: 24px;
+  height: 28px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 28'><path d='M12 2 C6 2 2 6.5 2 11 C2 15 5 18 8 20 L8 23 L16 23 L16 20 C19 18 22 15 22 11 C22 6.5 18 2 12 2 Z' fill='%230b2b6f'/><rect x='9' y='23' width='6' height='2' fill='%230b2b6f'/><rect x='10' y='25' width='4' height='1.5' fill='%230b2b6f'/></svg>") no-repeat center/contain;
+}
+.brand em { font-style: normal; color: var(--brand-accent); font-weight: 700; }
+
+.nav {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  font-size: 14px;
+  color: var(--brand-ink-1);
+}
+.nav a {
+  color: inherit;
+  text-decoration: none;
+  padding: 22px 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+}
+.nav a:hover { color: var(--brand-navy); }
+.nav a.on { color: var(--brand-navy); border-bottom-color: var(--brand-accent); }
+
+.topRight {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+.iconBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 0;
+  color: var(--brand-ink-1);
+  background: transparent;
+  cursor: pointer;
+}
+.iconBtn:hover { color: var(--brand-navy); background: var(--brand-bg-2); }
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffd2b8, #ffa477 80%);
+  color: #663a1e;
+  font-weight: 600;
+  font-size: 12px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--brand-line);
+}
+.ic {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
