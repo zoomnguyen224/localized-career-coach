@@ -113,8 +113,8 @@ export function CVPageClient() {
     <div className="flex flex-col h-full">
       {/* Page header */}
       <div className="px-7 pt-6 pb-4 flex-shrink-0">
-        <h1 className="text-xl font-extrabold text-[#0a0b0d]">My CV</h1>
-        <p className="text-[12px] text-[#727998] mt-0.5">
+        <h1 className="text-xl font-extrabold text-[var(--brand-ink-0)]">My CV</h1>
+        <p className="text-[12px] text-[var(--brand-ink-2)] mt-0.5">
           Master CV · {generatedCVs.length} tailored {generatedCVs.length === 1 ? 'version' : 'versions'} generated
         </p>
       </div>
