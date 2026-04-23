@@ -1,0 +1,81 @@
+.root {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--brand-line);
+  border-radius: 14px;
+  padding: 22px 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.root:hover { border-color: var(--brand-ink-3); }
+.tick {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 3px;
+}
+.high .tick { background: var(--brand-rose); }
+.med .tick { background: var(--brand-amber); }
+.info .tick { background: var(--brand-accent); }
+
+.sev {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--brand-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.sev .dot { width: 7px; height: 7px; border-radius: 50%; }
+.high .sev { color: var(--brand-rose); }
+.high .sev .dot { background: var(--brand-rose); box-shadow: 0 0 0 3px var(--brand-rose-soft); }
+.med .sev { color: var(--brand-amber); }
+.med .sev .dot { background: var(--brand-amber); box-shadow: 0 0 0 3px var(--brand-amber-soft); }
+.info .sev { color: var(--brand-accent); }
+.info .sev .dot { background: var(--brand-accent); box-shadow: 0 0 0 3px var(--brand-severity-info-soft); }
+.sev .when { color: var(--brand-ink-3); font-weight: 500; letter-spacing: 0.14em; }
+.sev .sep { color: var(--brand-ink-3); margin: 0 2px; }
+
+.title {
+  margin: 0;
+  font-family: var(--brand-font-display);
+  font-weight: 600;
+  font-size: 19px;
+  line-height: 1.3;
+  letter-spacing: -0.012em;
+  color: var(--brand-ink-0);
+  text-wrap: pretty;
+}
+
+.forYou { display: flex; flex-direction: column; gap: 5px; }
+.forYouLbl {
+  font-family: var(--brand-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--brand-ink-3);
+  font-weight: 600;
+}
+.forYouBody { font-size: 13.5px; line-height: 1.55; color: var(--brand-ink-1); }
+.forYouBody b { color: var(--brand-ink-0); font-weight: 600; }
+
+.evList {
+  margin: 2px -24px -18px;
+  padding: 14px 24px 18px;
+  border-top: 1px dashed var(--brand-line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.evCtx {
+  font-family: var(--brand-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brand-ink-3);
+  font-weight: 600;
+}
