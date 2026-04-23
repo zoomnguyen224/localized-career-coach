@@ -40,15 +40,15 @@ export function computeStats(applications: Application[]): {
 }
 
 export function scoreColorClass(score: number): string {
-  if (score >= 4.0) return 'text-[#03BA82] bg-[#E6FAF4]'
-  if (score >= 3.5) return 'text-[#FAA82C] bg-[#FFF8EC]'
-  return 'text-[#F84E4E] bg-[#FFF0F0]'
+  if (score >= 4.0) return 'text-[var(--brand-severity-ok)] bg-[var(--brand-severity-ok-soft)]'
+  if (score >= 3.5) return 'text-[var(--brand-severity-med)] bg-[var(--brand-severity-med-soft)]'
+  return 'text-[var(--brand-severity-high)] bg-[var(--brand-severity-high-soft)]'
 }
 
 export function cardLeftBorderClass(alertType: AlertType, status: ApplicationStatus): string {
-  if (alertType === 'interview') return 'border-l-[#0052ff]'
-  if (alertType === 'follow-up' || alertType === 'deadline') return 'border-l-[#FAA82C]'
-  if (status === 'offer') return 'border-l-[#03BA82]'
+  if (alertType === 'interview') return 'border-l-[var(--brand-accent)]'
+  if (alertType === 'follow-up' || alertType === 'deadline') return 'border-l-[var(--brand-severity-med)]'
+  if (status === 'offer') return 'border-l-[var(--brand-severity-ok)]'
   return 'border-l-transparent'
 }
 
@@ -67,11 +67,11 @@ export const COLUMNS: Array<{
   color: string
   headerBg: string
 }> = [
-  { status: 'evaluated', label: 'Evaluated', color: '#727998', headerBg: '#eef0f3' },
-  { status: 'applied',   label: 'Applied',   color: '#0052ff', headerBg: '#e8f0fe' },
-  { status: 'interview', label: 'Interview', color: '#FAA82C', headerBg: '#FFF8EC' },
-  { status: 'offer',     label: 'Offer',     color: '#03BA82', headerBg: '#E6FAF4' },
-  { status: 'rejected',  label: 'Rejected',  color: '#F84E4E', headerBg: '#FFF0F0' },
+  { status: 'evaluated', label: 'Evaluated', color: 'var(--brand-ink-2)',       headerBg: 'var(--brand-bg-2)' },
+  { status: 'applied',   label: 'Applied',   color: 'var(--brand-severity-info)', headerBg: 'var(--brand-severity-info-soft)' },
+  { status: 'interview', label: 'Interview', color: 'var(--brand-severity-med)',  headerBg: 'var(--brand-severity-med-soft)' },
+  { status: 'offer',     label: 'Offer',     color: 'var(--brand-severity-ok)',   headerBg: 'var(--brand-severity-ok-soft)' },
+  { status: 'rejected',  label: 'Rejected',  color: 'var(--brand-severity-high)', headerBg: 'var(--brand-severity-high-soft)' },
 ]
 
 // ─── Demo data ───────────────────────────────────────────────────

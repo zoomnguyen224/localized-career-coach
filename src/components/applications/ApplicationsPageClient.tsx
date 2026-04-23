@@ -41,21 +41,21 @@ export function ApplicationsPageClient() {
       {/* Page header */}
       <div className="px-7 pt-6 pb-4 flex-shrink-0 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-extrabold text-[#0a0b0d]">Applications</h1>
-          <p className="text-[12px] text-[#727998] mt-0.5">
+          <h1 className="text-xl font-extrabold text-[var(--brand-ink-0)]">Applications</h1>
+          <p className="text-[12px] text-[var(--brand-ink-2)] mt-0.5">
             {applications.length} applications · drag cards to update status
           </p>
         </div>
         <div className="flex items-center gap-3">
           <button
-            className="border border-[#d8dbe4] text-[#727998] text-[12px] font-semibold px-4 py-2 rounded-[14px] hover:border-[#0052ff] hover:text-[#0052ff] transition-colors"
+            className="border border-[var(--brand-line)] text-[var(--brand-ink-2)] text-[12px] font-semibold px-4 py-2 rounded-[14px] hover:border-[var(--brand-accent)] hover:text-[var(--brand-accent)] transition-colors"
           >
             Pattern analysis
-            <span className="ml-1.5 text-[9px] bg-[#eef0f3] text-[#8D96B4] px-1.5 py-0.5 rounded-full font-bold">SOON</span>
+            <span className="ml-1.5 text-[9px] bg-[var(--brand-bg-2)] text-[var(--brand-ink-3)] px-1.5 py-0.5 rounded-full font-bold">SOON</span>
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="bg-[#0052ff] text-white text-[12px] font-bold px-4 py-2 rounded-[14px]"
+            className="bg-[var(--brand-accent)] text-white text-[12px] font-bold px-4 py-2 rounded-[14px]"
           >
             + Add application
           </button>

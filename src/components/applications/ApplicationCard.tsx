@@ -21,18 +21,18 @@ export function ApplicationCard({ application, onDragStart }: ApplicationCardPro
     <div
       draggable
       onDragStart={() => onDragStart(application.id)}
-      className={`bg-white border border-[#d8dbe4] border-l-4 ${cardLeftBorderClass(application.alertType, application.status)}
+      className={`bg-white border border-[var(--brand-line)] border-l-4 ${cardLeftBorderClass(application.alertType, application.status)}
         rounded-[10px] p-3.5 cursor-grab active:cursor-grabbing select-none
         shadow-[0_2px_12px_rgba(151,155,192,0.12)] hover:shadow-[0_4px_20px_rgba(151,155,192,0.2)] transition-shadow`}
     >
       {/* Header row */}
       <div className="flex items-center gap-2.5 mb-2">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0052ff] to-[#0a0b0d] flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--brand-accent)] to-[var(--brand-ink-0)] flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
           {initials}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[12px] font-bold text-[#0a0b0d] truncate">{application.company}</div>
-          <div className="text-[10px] text-[#727998] truncate">{application.jobTitle}</div>
+          <div className="text-[12px] font-bold text-[var(--brand-ink-0)] truncate">{application.company}</div>
+          <div className="text-[10px] text-[var(--brand-ink-2)] truncate">{application.jobTitle}</div>
         </div>
         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${scoreColorClass(application.matchScore)}`}>
           {application.matchScore.toFixed(1)}
@@ -41,17 +41,17 @@ export function ApplicationCard({ application, onDragStart }: ApplicationCardPro
 
       {/* Alert message */}
       {application.alertMessage && (
-        <div className="text-[10px] text-[#FAA82C] font-semibold bg-[#FFF8EC] px-2 py-1 rounded-lg mb-2 leading-relaxed">
+        <div className="text-[10px] text-[var(--brand-severity-med)] font-semibold bg-[var(--brand-severity-med-soft)] px-2 py-1 rounded-lg mb-2 leading-relaxed">
           {application.alertMessage}
         </div>
       )}
 
       {/* Offer banner */}
       {application.status === 'offer' && application.salaryOffer && (
-        <div className="bg-[#E6FAF4] border border-[#03BA82]/20 rounded-lg px-2 py-1.5 mb-2">
-          <div className="text-[11px] font-bold text-[#03BA82]">{application.salaryOffer}</div>
+        <div className="bg-[var(--brand-severity-ok-soft)] border border-[var(--brand-severity-ok)]/20 rounded-lg px-2 py-1.5 mb-2">
+          <div className="text-[11px] font-bold text-[var(--brand-severity-ok)]">{application.salaryOffer}</div>
           {application.offerDeadline && (
-            <div className="text-[9px] text-[#727998] mt-0.5">
+            <div className="text-[9px] text-[var(--brand-ink-2)] mt-0.5">
               Deadline: {new Date(application.offerDeadline).toLocaleDateString()}
             </div>
           )}
@@ -59,7 +59,7 @@ export function ApplicationCard({ application, onDragStart }: ApplicationCardPro
       )}
 
       {/* Last activity */}
-      <div className="text-[9px] text-[#8D96B4]">{timeSince(application.lastActivity)}</div>
+      <div className="text-[9px] text-[var(--brand-ink-3)]">{timeSince(application.lastActivity)}</div>
     </div>
   )
 }

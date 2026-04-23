@@ -50,8 +50,8 @@ export function KanbanColumn({
         ))}
 
         {applications.length === 0 && (
-          <div className="flex-1 border-2 border-dashed border-[#d8dbe4] rounded-[10px] flex items-center justify-center">
-            <span className="text-[10px] text-[#8D96B4]">Drop here</span>
+          <div className="flex-1 border-2 border-dashed border-[var(--brand-line)] rounded-[10px] flex items-center justify-center">
+            <span className="text-[10px] text-[var(--brand-ink-3)]">Drop here</span>
           </div>
         )}
       </div>

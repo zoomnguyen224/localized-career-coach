@@ -31,14 +31,14 @@ export function AddApplicationModal({ onAdd, onClose }: AddApplicationModalProps
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
       <div className="bg-white rounded-[10px] p-6 w-[380px] shadow-[0_20px_60px_rgba(0,0,0,0.15)]">
-        <div className="text-[14px] font-extrabold text-[#0a0b0d] mb-4">Add Application</div>
+        <div className="text-[14px] font-extrabold text-[var(--brand-ink-0)] mb-4">Add Application</div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
             type="text"
             placeholder="Company"
             value={company}
             onChange={e => setCompany(e.target.value)}
-            className="border border-[#d8dbe4] rounded-[10px] px-3 py-2 text-[12px] text-[#0a0b0d] placeholder:text-[#8D96B4] outline-none focus:border-[#0052ff]"
+            className="border border-[var(--brand-line)] rounded-[10px] px-3 py-2 text-[12px] text-[var(--brand-ink-0)] placeholder:text-[var(--brand-ink-3)] outline-none focus:border-[var(--brand-accent)]"
             required
             autoFocus
           />
@@ -47,12 +47,12 @@ export function AddApplicationModal({ onAdd, onClose }: AddApplicationModalProps
             placeholder="Job title"
             value={jobTitle}
             onChange={e => setJobTitle(e.target.value)}
-            className="border border-[#d8dbe4] rounded-[10px] px-3 py-2 text-[12px] text-[#0a0b0d] placeholder:text-[#8D96B4] outline-none focus:border-[#0052ff]"
+            className="border border-[var(--brand-line)] rounded-[10px] px-3 py-2 text-[12px] text-[var(--brand-ink-0)] placeholder:text-[var(--brand-ink-3)] outline-none focus:border-[var(--brand-accent)]"
             required
           />
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="text-[10px] font-semibold text-[#727998] mb-1 block">Match Score (0–5)</label>
+              <label className="text-[10px] font-semibold text-[var(--brand-ink-2)] mb-1 block">Match Score (0–5)</label>
               <input
                 type="number"
                 step="0.1"
@@ -60,15 +60,15 @@ export function AddApplicationModal({ onAdd, onClose }: AddApplicationModalProps
                 max="5"
                 value={matchScore}
                 onChange={e => setMatchScore(e.target.value)}
-                className="w-full border border-[#d8dbe4] rounded-[10px] px-3 py-2 text-[12px] text-[#0a0b0d] outline-none focus:border-[#0052ff]"
+                className="w-full border border-[var(--brand-line)] rounded-[10px] px-3 py-2 text-[12px] text-[var(--brand-ink-0)] outline-none focus:border-[var(--brand-accent)]"
               />
             </div>
             <div className="flex-1">
-              <label className="text-[10px] font-semibold text-[#727998] mb-1 block">Stage</label>
+              <label className="text-[10px] font-semibold text-[var(--brand-ink-2)] mb-1 block">Stage</label>
               <select
                 value={status}
                 onChange={e => setStatus(e.target.value as ApplicationStatus)}
-                className="w-full border border-[#d8dbe4] rounded-[10px] px-3 py-2 text-[12px] text-[#0a0b0d] outline-none focus:border-[#0052ff] bg-white"
+                className="w-full border border-[var(--brand-line)] rounded-[10px] px-3 py-2 text-[12px] text-[var(--brand-ink-0)] outline-none focus:border-[var(--brand-accent)] bg-white"
               >
                 <option value="evaluated">Evaluated</option>
                 <option value="applied">Applied</option>
@@ -82,13 +82,13 @@ export function AddApplicationModal({ onAdd, onClose }: AddApplicationModalProps
             <button
               type="button"
               onClick={onClose}
-              className="text-[12px] text-[#727998] font-semibold px-4 py-2"
+              className="text-[12px] text-[var(--brand-ink-2)] font-semibold px-4 py-2"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-[#0052ff] text-white text-[12px] font-bold px-5 py-2 rounded-[14px]"
+              className="bg-[var(--brand-accent)] text-white text-[12px] font-bold px-5 py-2 rounded-[14px]"
             >
               Add
             </button>
