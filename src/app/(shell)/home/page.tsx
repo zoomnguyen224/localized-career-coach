@@ -1,106 +1,30 @@
 import Link from 'next/link'
 import styles from './home.module.css'
+import { Hero } from '@/components/primitives/Hero'
+import { SectionLabel } from '@/components/primitives/SectionLabel'
+import { SeverityCard } from '@/components/primitives/SeverityCard'
+import { DataRow } from '@/components/primitives/DataRow'
 
 export default function HomePage() {
   return (
-    <div className={styles.root}>
-      <TopBar />
-      <main className={styles.page}>
-        <Hero />
-        <MarketRadar />
-        <CareerMap />
-        <NextMove />
-        <NotHere />
-      </main>
-    </div>
-  )
-}
-
-/* ── TOP BAR ─────────────────────────── */
-function TopBar() {
-  return (
-    <header className={styles.topbar}>
-      <div className={styles.brand}>
-        <span className={styles.brandMark} />
-        <span>
-          Localiz<em>ed</em>
-        </span>
-      </div>
-
-      <nav className={styles.nav}>
-        <Link href="/home" className={styles.on}>
-          <svg className={styles.ic} viewBox="0 0 24 24">
-            <path d="M3 12l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" />
-          </svg>
-          Home
-        </Link>
-        <Link href="#">
-          <svg className={styles.ic} viewBox="0 0 24 24">
-            <rect x="3" y="5" width="18" height="16" rx="2" />
-            <path d="M3 9h18M8 3v4M16 3v4" />
-          </svg>
-          Events
-        </Link>
-        <Link href="/jobs">
-          <svg className={styles.ic} viewBox="0 0 24 24">
-            <rect x="3" y="7" width="18" height="14" rx="2" />
-            <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-          </svg>
-          Jobs
-        </Link>
-        <Link href="#">
-          <svg className={styles.ic} viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="9" />
-            <circle cx="12" cy="12" r="3" />
-            <path d="M12 3v3M12 18v3M3 12h3M18 12h3" />
-          </svg>
-          Career Map
-        </Link>
-      </nav>
-
-      <div className={styles.topRight}>
-        <button type="button" className={styles.iconBtn} aria-label="Search">
-          <svg className={styles.ic} viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-3.5-3.5" />
-          </svg>
-        </button>
-        <button type="button" className={styles.iconBtn} aria-label="Messages">
-          <svg className={styles.ic} viewBox="0 0 24 24">
-            <path d="M21 12a8 8 0 0 1-11.3 7.3L4 21l1.7-5.7A8 8 0 1 1 21 12z" />
-          </svg>
-        </button>
-        <button type="button" className={styles.iconBtn} aria-label="Notifications">
-          <svg className={styles.ic} viewBox="0 0 24 24">
-            <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9zM10 21a2 2 0 0 0 4 0" />
-          </svg>
-        </button>
-        <div className={styles.avatar}>AH</div>
-      </div>
-    </header>
-  )
-}
-
-/* ── HERO ─────────────────────────── */
-function Hero() {
-  return (
-    <div className={styles.hero}>
-      <h1>
-        Good morning, Ahmed.
-        <br />
-        <span className={styles.heroSub}>
-          The world moved overnight — here&apos;s what it means for <em>you</em>.
-        </span>
-      </h1>
-      <div className={styles.byline}>
-        <div>
-          Cairo · <strong>08:14 local</strong>
-        </div>
-        <div className={styles.bylineSync}>
-          Map synced <span className={styles.bylineDot}>●</span> 2m ago
-        </div>
-      </div>
-    </div>
+    <main className={styles.page}>
+      <Hero
+        title={<>Good morning, Ahmed.</>}
+        subtitle={
+          <>
+            The world moved overnight — here&apos;s what it means for <em>you</em>.
+          </>
+        }
+        byline={[
+          { label: 'Cairo', value: '08:14 local' },
+          { label: 'Map synced', value: '2m ago', dotColor: 'var(--brand-emerald)' },
+        ]}
+      />
+      <MarketRadar />
+      <CareerMap />
+      <NextMove />
+      <NotHere />
+    </main>
   )
 }
 
@@ -108,113 +32,97 @@ function Hero() {
 function MarketRadar() {
   return (
     <section className={styles.radar}>
-      <div className={styles.secLabel}>
-        <span className={styles.num}>01</span>
-        <span>Market Radar</span>
-        <span className={styles.line} />
-        <span className={styles.meta}>Updated for Ahmed · 08:14 Cairo</span>
-      </div>
+      <SectionLabel number="01" title="Market Radar" meta="Updated for Ahmed · 08:14 Cairo" />
 
       <div className={styles.radarGrid}>
-        {/* High severity */}
-        <article className={`${styles.signal} ${styles.high}`}>
-          <span className={styles.tick} />
-          <div className={styles.sev}>
-            <span className={styles.dot} /> High signal{' '}
-            <span className={styles.sep}>·</span>{' '}
-            <span className={styles.when}>2 days ago</span>
-          </div>
-          <h3>Northbay Energy rewrote the Junior Data Engineer JD.</h3>
-          <div className={styles.forYou}>
-            <div className={styles.forYouLbl}>What it means for you</div>
-            <div className={styles.forYouBody}>
-              Match dropped <span className={styles.delta}>72 → 68%</span>. They now require{' '}
-              <b>SQL window functions</b> — a skill you don&apos;t have yet.
-            </div>
-          </div>
-          <div className={styles.evList}>
-            <div className={styles.evCtx}>The job itself</div>
-            <a className={styles.ev} href="#">
-              <span className={`${styles.evLogo} ${styles.nb}`}>NB</span>
-              <span className={styles.evBody}>
-                <span className={styles.evTitle}>Jr. Data Engineer · Northbay Energy</span>
-                <span className={styles.evSub}>Dhahran / Remote · updated 2d ago</span>
-              </span>
-              <span className={`${styles.evTail} ${styles.down}`}>68%</span>
-            </a>
-          </div>
-        </article>
+        <SeverityCard
+          tone="high"
+          label="High signal"
+          when="2 days ago"
+          title="Northbay Energy rewrote the Junior Data Engineer JD."
+          forYou={{
+            label: 'What it means for you',
+            body: (
+              <>
+                Match dropped <span className={styles.delta}>72 → 68%</span>. They now require{' '}
+                <b>SQL window functions</b> — a skill you don&apos;t have yet.
+              </>
+            ),
+          }}
+          eventsHeader="The job itself"
+        >
+          <DataRow
+            href="#"
+            logo={<span className={`${styles.evLogo} ${styles.nb}`}>NB</span>}
+            title="Jr. Data Engineer · Northbay Energy"
+            sub="Dhahran / Remote · updated 2d ago"
+            tail={{ text: '68%', tone: 'down' }}
+          />
+        </SeverityCard>
 
-        {/* Medium severity */}
-        <article className={`${styles.signal} ${styles.med}`}>
-          <span className={styles.tick} />
-          <div className={styles.sev}>
-            <span className={styles.dot} /> Medium signal{' '}
-            <span className={styles.sep}>·</span>{' '}
-            <span className={styles.when}>this month</span>
-          </div>
-          <h3>Gulf employers are hiring remote workers from Egypt.</h3>
-          <div className={styles.forYou}>
-            <div className={styles.forYouLbl}>What it means for you</div>
-            <div className={styles.forYouBody}>
-              Remote Gulf postings <span className={`${styles.delta} ${styles.up}`}>+34%</span>.{' '}
-              <b>3 new roles</b> match your profile — two strong, one worth a look.
-            </div>
-          </div>
-          <div className={styles.evList}>
-            <div className={styles.evCtx}>Top 2 matches · of 3</div>
-            <a className={styles.ev} href="#">
-              <span className={`${styles.evLogo} ${styles.vl}`}>VL</span>
-              <span className={styles.evBody}>
-                <span className={styles.evTitle}>Data Ops Engineer · Jr. · Veolia</span>
-                <span className={styles.evSub}>Remote → Riyadh · posted 4d ago</span>
-              </span>
-              <span className={`${styles.evTail} ${styles.up}`}>81%</span>
-            </a>
-            <a className={styles.ev} href="#">
-              <span className={`${styles.evLogo} ${styles.tr}`}>TM</span>
-              <span className={styles.evBody}>
-                <span className={styles.evTitle}>Applied Data Engineer · Trend Micro</span>
-                <span className={styles.evSub}>Remote → Dubai · posted 1w ago</span>
-              </span>
-              <span className={`${styles.evTail} ${styles.up}`}>74%</span>
-            </a>
-          </div>
-        </article>
+        <SeverityCard
+          tone="med"
+          label="Medium signal"
+          when="this month"
+          title="Gulf employers are hiring remote workers from Egypt."
+          forYou={{
+            label: 'What it means for you',
+            body: (
+              <>
+                Remote Gulf postings <span className={`${styles.delta} ${styles.up}`}>+34%</span>.{' '}
+                <b>3 new roles</b> match your profile — two strong, one worth a look.
+              </>
+            ),
+          }}
+          eventsHeader="Top 2 matches · of 3"
+        >
+          <DataRow
+            href="#"
+            logo={<span className={`${styles.evLogo} ${styles.vl}`}>VL</span>}
+            title="Data Ops Engineer · Jr. · Veolia"
+            sub="Remote → Riyadh · posted 4d ago"
+            tail={{ text: '81%', tone: 'up' }}
+          />
+          <DataRow
+            href="#"
+            logo={<span className={`${styles.evLogo} ${styles.tr}`}>TM</span>}
+            title="Applied Data Engineer · Trend Micro"
+            sub="Remote → Dubai · posted 1w ago"
+            tail={{ text: '74%', tone: 'up' }}
+          />
+        </SeverityCard>
 
-        {/* Info severity */}
-        <article className={`${styles.signal} ${styles.info}`}>
-          <span className={styles.tick} />
-          <div className={styles.sev}>
-            <span className={styles.dot} /> Informational{' '}
-            <span className={styles.sep}>·</span>{' '}
-            <span className={styles.when}>12-week drift</span>
-          </div>
-          <h3>SQL window functions went from nice-to-have to required.</h3>
-          <div className={styles.forYou}>
-            <div className={styles.forYouLbl}>What it means for you</div>
-            <div className={styles.forYouBody}>
-              Now in <span className={`${styles.delta} ${styles.neutral}`}>78%</span> of Data Eng
-              postings (was 52%). Learning <b>this one skill</b> recovers your Northbay match.
-            </div>
-          </div>
-          <div className={styles.evList}>
-            <div className={styles.evCtx}>Event that closes the gap</div>
-            <a className={styles.ev} href="#">
+        <SeverityCard
+          tone="info"
+          label="Informational"
+          when="12-week drift"
+          title="SQL window functions went from nice-to-have to required."
+          forYou={{
+            label: 'What it means for you',
+            body: (
+              <>
+                Now in <span className={`${styles.delta} ${styles.neutral}`}>78%</span> of Data Eng
+                postings (was 52%). Learning <b>this one skill</b> recovers your Northbay match.
+              </>
+            ),
+          }}
+          eventsHeader="Event that closes the gap"
+        >
+          <DataRow
+            href="#"
+            logo={
               <span className={`${styles.evLogo} ${styles.evt}`}>
                 <svg viewBox="0 0 24 24">
                   <rect x="3" y="5" width="18" height="16" rx="2" />
                   <path d="M3 9h18M8 3v4M16 3v4" />
                 </svg>
               </span>
-              <span className={styles.evBody}>
-                <span className={styles.evTitle}>Workshop · SQL Window Functions in Practice</span>
-                <span className={styles.evSub}>Localized · Live · 90 min</span>
-              </span>
-              <span className={`${styles.evTail} ${styles.neutral}`}>May 14</span>
-            </a>
-          </div>
-        </article>
+            }
+            title="Workshop · SQL Window Functions in Practice"
+            sub="Localized · Live · 90 min"
+            tail={{ text: 'May 14', tone: 'neutral' }}
+          />
+        </SeverityCard>
       </div>
     </section>
   )
@@ -224,30 +132,31 @@ function MarketRadar() {
 function CareerMap() {
   return (
     <section className={styles.map}>
-      <div className={styles.secLabel}>
-        <span className={styles.num}>02</span>
-        <span>Your Career Map, responding</span>
-        <span className={styles.line} />
-        <span className={styles.vstrip}>
-          <span className={styles.vlbl}>Enrolled · 2 of 4</span>
-          <span className={`${styles.vchip} ${styles.on} ${styles.ai}`}>
-            <span className={styles.vdot} />
-            AI &amp; Data
+      <SectionLabel
+        number="02"
+        title="Your Career Map, responding"
+        meta={
+          <span className={styles.vstrip}>
+            <span className={styles.vlbl}>Enrolled · 2 of 4</span>
+            <span className={`${styles.vchip} ${styles.on} ${styles.ai}`}>
+              <span className={styles.vdot} />
+              AI &amp; Data
+            </span>
+            <span className={`${styles.vchip} ${styles.on} ${styles.virt}`}>
+              <span className={styles.vdot} />
+              Virtual Intelligence
+            </span>
+            <span className={`${styles.vchip} ${styles.green}`}>
+              <span className={styles.vdot} />
+              Green Skills
+            </span>
+            <span className={`${styles.vchip} ${styles.ready}`}>
+              <span className={styles.vdot} />
+              Career Readiness
+            </span>
           </span>
-          <span className={`${styles.vchip} ${styles.on} ${styles.virt}`}>
-            <span className={styles.vdot} />
-            Virtual Intelligence
-          </span>
-          <span className={`${styles.vchip} ${styles.green}`}>
-            <span className={styles.vdot} />
-            Green Skills
-          </span>
-          <span className={`${styles.vchip} ${styles.ready}`}>
-            <span className={styles.vdot} />
-            Career Readiness
-          </span>
-        </span>
-      </div>
+        }
+      />
 
       <div className={styles.mapWrap}>
         <div className={styles.mapCanvas}>
@@ -457,12 +366,7 @@ function CareerMap() {
 function NextMove() {
   return (
     <section className={styles.move}>
-      <div className={styles.secLabel}>
-        <span className={styles.num}>03</span>
-        <span>Your Next Move</span>
-        <span className={styles.line} />
-        <span className={styles.meta}>One action · chosen by your agent</span>
-      </div>
+      <SectionLabel number="03" title="Your Next Move" meta="One action · chosen by your agent" />
 
       <div className={styles.moveCard}>
         <div>
