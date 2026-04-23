@@ -28,8 +28,8 @@ export function InterviewSessionPanel({
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-3 py-20">
         <div className="text-4xl">🎯</div>
-        <div className="text-[14px] font-bold text-[#0a0b0d]">Select an interview to prepare</div>
-        <div className="text-[12px] text-[#727998]">Choose a company from your upcoming interviews</div>
+        <div className="text-[14px] font-bold text-[var(--brand-ink-0)]">Select an interview to prepare</div>
+        <div className="text-[12px] text-[var(--brand-ink-2)]">Choose a company from your upcoming interviews</div>
       </div>
     )
   }
@@ -44,15 +44,15 @@ export function InterviewSessionPanel({
     <div className="flex-1 flex flex-col overflow-y-auto px-6 py-5">
       <CompanyIntelBanner company={session.company} role={session.role} process={process} />
 
-      <div className="flex gap-1 bg-[#eef0f3] rounded-[10px] p-1 mb-5 flex-shrink-0">
+      <div className="flex gap-1 bg-[var(--brand-bg-2)] rounded-[10px] p-1 mb-5 flex-shrink-0">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 text-[11px] font-bold py-2 rounded-lg transition-colors ${
               activeTab === tab.id
-                ? 'bg-white text-[#0052ff] shadow-sm'
-                : 'text-[#727998] hover:text-[#0a0b0d]'
+                ? 'bg-white text-[var(--brand-accent)] shadow-sm'
+                : 'text-[var(--brand-ink-2)] hover:text-[var(--brand-ink-0)]'
             }`}
           >
             {tab.label}
