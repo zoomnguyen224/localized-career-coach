@@ -1,0 +1,9 @@
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 40px 80px;
+  color: var(--brand-ink-0);
+  font-family: var(--brand-font-ui);
+  font-size: 14px;
+  line-height: 1.45;
+}
