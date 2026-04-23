@@ -1,13 +1,20 @@
 // src/components/cv/CVPageClient.tsx
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { v4 as uuidv4 } from 'uuid'
 import { GeneratedCV } from '@/types/cv'
+import type { CurrentSkill, UserProfile } from '@/types'
 import { ProfileColumn } from './ProfileColumn'
 import { CVPreview } from './CVPreview'
 import { GeneratedCVList } from './GeneratedCVList'
+import { TargetRolePicker } from '@/components/career-map/TargetRolePicker'
+import {
+  getActiveThreadId,
+  setActiveThreadId,
+  createConversation,
+} from '@/lib/conversation-store'
 
 const DEMO_PROFILE = {
   name: 'Ahmed Nasser',
@@ -54,6 +61,20 @@ BSc Computer Engineering — Cairo University (2017)
 ## Skills
 Python, LangChain, LlamaIndex, FastAPI, Docker, Kubernetes, AWS, Arabic NLP, RAG, LLM fine-tuning, Pinecone, Weaviate, PyTorch, Transformers`
 
+// DEMO_PROFILE mapped into the shared UserProfile / CurrentSkill shapes that
+// `seedFromProfile` consumes. In a real parse flow these come from
+// /api/parse-cv; here we treat DEMO_PROFILE as the "already-parsed" record.
+const DEMO_USER_PROFILE: UserProfile = {
+  name: DEMO_PROFILE.name,
+  location: DEMO_PROFILE.location,
+  background: 'Senior AI Engineer (demo CV)',
+  currentLevel: 'senior',
+}
+const DEMO_CURRENT_SKILLS: CurrentSkill[] = DEMO_PROFILE.skills.map(s => ({
+  name: s.name,
+  currentLevel: s.level,
+}))
+
 export function CVPageClient() {
   const searchParams = useSearchParams()
   const initialJobTitle = searchParams.get('jobTitle') || undefined
@@ -61,6 +82,22 @@ export function CVPageClient() {
   const [generatedCVs, setGeneratedCVs] = useState<GeneratedCV[]>([])
   const [activeCV, setActiveCV] = useState<GeneratedCV | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [learnerId, setLearnerId] = useState<string | null>(null)
+
+  // Resolve (or mint) the active thread id on the client — used as the
+  // learnerId that keys the CareerGraph in localStorage. Minting re-uses
+  // the existing conversation-store helper instead of inventing a new id
+  // scheme.
+  useEffect(() => {
+    const existing = getActiveThreadId()
+    if (existing) {
+      setLearnerId(existing)
+      return
+    }
+    const conv = createConversation()
+    setActiveThreadId(conv.id)
+    setLearnerId(conv.id)
+  }, [])
 
   async function handleGenerate(jobTitle: string, company: string, jobDescription: string) {
     setIsGenerating(true)
@@ -118,6 +155,18 @@ export function CVPageClient() {
           Master CV · {generatedCVs.length} tailored {generatedCVs.length === 1 ? 'version' : 'versions'} generated
         </p>
       </div>
+
+      {/* Post-parse career-map picker (mount once learnerId is resolved to
+          avoid hydration mismatch on localStorage reads). */}
+      {learnerId ? (
+        <div className="px-7 flex-shrink-0">
+          <TargetRolePicker
+            learnerId={learnerId}
+            profile={DEMO_USER_PROFILE}
+            currentSkills={DEMO_CURRENT_SKILLS}
+          />
+        </div>
+      ) : null}
 
       {/* 3-column body */}
       <div className="flex flex-1 gap-5 px-7 pb-6 overflow-hidden">
