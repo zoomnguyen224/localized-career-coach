@@ -5,6 +5,7 @@ import { useState, useCallback } from 'react'
 import { computeStats, DEMO_APPLICATIONS } from '@/lib/applications'
 import { computeFollowUps } from '@/lib/followup'
 import { SkillRadarChart } from '@/components/generative-ui/SkillRadarChart'
+import { SectionLabel } from '@/components/primitives/SectionLabel'
 import type { SkillGapResult } from '@/types'
 import { StatCard } from './StatCard'
 import { PipelineSummary } from './PipelineSummary'
@@ -54,26 +55,19 @@ export function DashboardClient() {
   }, [])
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
-      {/* Page header */}
-      <div className="px-7 pt-6 pb-4 flex-shrink-0 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-extrabold text-[#0a0b0d]">Your AI Command Center</h1>
-          <p className="text-[12px] text-[#727998] mt-0.5">
-            Good morning, Ahmed — your agents worked overnight. Here&apos;s what they found.
-          </p>
-        </div>
-        <ScannerStatus onScanComplete={handleScanComplete} />
-      </div>
-
-      <div className="px-7 pb-6 flex flex-col gap-5">
-        {/* Stat cards row */}
+    <div className="flex flex-col gap-8">
+      <section>
+        <SectionLabel
+          number="01"
+          title="Snapshot"
+          meta={<ScannerStatus onScanComplete={handleScanComplete} />}
+        />
         <div className="grid grid-cols-4 gap-4">
           <StatCard
             label="Matches Found by Agents"
             value={jobMatchCount}
             subtitle={newTodayCount > 0 ? `${newTodayCount} new since last scan` : 'Run scan to refresh'}
-            valueColor="#0052ff"
+            valueColor="var(--brand-accent)"
           />
           <StatCard
             label="Applications Sent"
@@ -84,34 +78,38 @@ export function DashboardClient() {
             label="Profile Readiness"
             value="87%"
             subtitle="Agents found 2 improvements"
-            valueColor="#03BA82"
+            valueColor="var(--brand-severity-ok)"
           />
           <StatCard
             label="Avg Agent Score"
             value={`${avgScore}/5`}
             subtitle="Across all evaluated roles"
-            valueColor={avgScore >= 4.0 ? '#03BA82' : '#FAA82C'}
+            valueColor={avgScore >= 4.0 ? 'var(--brand-severity-ok)' : 'var(--brand-severity-med)'}
           />
         </div>
+      </section>
 
-        {/* Two-column body */}
-        <div className="grid grid-cols-[1fr_340px] gap-5">
-          {/* Left column */}
-          <div className="flex flex-col gap-5">
+      <div className="grid grid-cols-[1fr_340px] gap-8">
+        <div className="flex flex-col gap-8">
+          <section>
+            <SectionLabel number="02" title="Top matches" />
             <TopMatches matches={TOP_MATCHES} />
+          </section>
+          <section>
+            <SectionLabel number="03" title="Pipeline" />
             <PipelineSummary pipelineCounts={pipelineCounts} total={total} />
-          </div>
+          </section>
+        </div>
 
-          {/* Right column */}
-          <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-8">
+          <section>
+            <SectionLabel number="04" title="Next actions" />
             <NextActions actions={liveActions} />
-            <div>
-              <div className="text-[10px] font-bold text-[#8D96B4] uppercase tracking-[0.08em] mb-2">
-                Agent Skill Assessment
-              </div>
-              <SkillRadarChart result={DEMO_SKILL_GAP} compact />
-            </div>
-          </div>
+          </section>
+          <section>
+            <SectionLabel number="05" title="Skill readiness" />
+            <SkillRadarChart result={DEMO_SKILL_GAP} compact />
+          </section>
         </div>
       </div>
     </div>
