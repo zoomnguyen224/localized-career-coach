@@ -1,0 +1,36 @@
+.strip {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 32px;
+  height: 36px;
+  border-bottom: 1px solid var(--brand-line);
+  background: var(--brand-bg-0);
+  position: sticky;
+  top: 64px;
+  z-index: 9;
+  font-family: var(--brand-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.label {
+  color: var(--brand-ink-3);
+  font-weight: 600;
+}
+.sep {
+  width: 1px;
+  height: 14px;
+  background: var(--brand-line);
+}
+.link {
+  color: var(--brand-ink-2);
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  font-size: 13px;
+  font-family: var(--brand-font-ui);
+}
+.link:hover { color: var(--brand-navy); }
+.link.on { color: var(--brand-navy); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; text-decoration-color: var(--brand-accent); }
