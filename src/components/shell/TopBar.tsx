@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import styles from './TopBar.module.css'
 
-type NavKey = 'home' | 'jobs' | 'careermap' | 'events'
+type NavKey = 'home' | 'jobs' | 'events'
 
 interface TopBarProps {
   activeNav: NavKey
@@ -17,8 +17,6 @@ const NAV: { key: NavKey; href: string; label: string; iconPath: string }[] = [
     iconPath: 'M3 5h18v16H3zM8 3v4M16 3v4M3 9h18' },
   { key: 'jobs', href: '/jobs', label: 'Jobs',
     iconPath: 'M3 7h18v14H3zM8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' },
-  { key: 'careermap', href: '/career-map', label: 'Career Map',
-    iconPath: 'M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0zM12 3v3M12 18v3M3 12h3M18 12h3' },
 ]
 
 export function TopBar({ activeNav, onOpenChat }: TopBarProps) {
@@ -30,18 +28,35 @@ export function TopBar({ activeNav, onOpenChat }: TopBarProps) {
       </div>
 
       <nav className={styles.nav}>
-        {NAV.map(item => (
-          <Link
-            key={item.key}
-            href={item.href}
-            className={activeNav === item.key ? styles.on : ''}
-          >
-            <svg className={styles.ic} viewBox="0 0 24 24">
-              <path d={item.iconPath} />
-            </svg>
-            {item.label}
-          </Link>
-        ))}
+        {NAV.map(item => {
+          if (item.key === 'events') {
+            return (
+              <span
+                key={item.key}
+                className={styles.disabled}
+                aria-disabled="true"
+                title="Coming soon"
+              >
+                <svg className={styles.ic} viewBox="0 0 24 24">
+                  <path d={item.iconPath} />
+                </svg>
+                {item.label}
+              </span>
+            )
+          }
+          return (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={activeNav === item.key ? styles.on : ''}
+            >
+              <svg className={styles.ic} viewBox="0 0 24 24">
+                <path d={item.iconPath} />
+              </svg>
+              {item.label}
+            </Link>
+          )
+        })}
       </nav>
 
       <div className={styles.topRight}>

@@ -33,7 +33,8 @@
   font-size: 14px;
   color: var(--brand-ink-1);
 }
-.nav a {
+.nav a,
+.nav .disabled {
   color: inherit;
   text-decoration: none;
   padding: 22px 2px;
@@ -45,6 +46,10 @@
 }
 .nav a:hover { color: var(--brand-navy); }
 .nav a.on { color: var(--brand-navy); border-bottom-color: var(--brand-accent); }
+.nav .disabled {
+  color: var(--brand-ink-3);
+  cursor: not-allowed;
+}
 
 .topRight {
   display: flex;
