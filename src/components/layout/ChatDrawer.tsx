@@ -90,22 +90,22 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
       )}
 
       <div
-        className={`fixed right-0 top-0 h-full w-[380px] bg-white border-l border-[#d8dbe4] shadow-2xl z-40 flex flex-col transition-transform duration-300 ${
+        className={`fixed right-0 top-0 h-full w-[380px] bg-white border-l border-[var(--brand-line)] shadow-2xl z-40 flex flex-col transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#d8dbe4] flex-shrink-0">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--brand-line)] flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#0052ff] to-[#03BA82] flex items-center justify-center text-xs">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--brand-accent)] to-[var(--brand-severity-ok)] flex items-center justify-center text-xs">
               🌍
             </div>
             <div>
-              <div className="text-[12px] font-extrabold text-[#0a0b0d]">Career Agent</div>
-              <div className="text-[10px] text-[#03BA82] font-semibold">● Online</div>
+              <div className="text-[12px] font-extrabold text-[var(--brand-ink-0)]">Career Agent</div>
+              <div className="text-[10px] text-[var(--brand-severity-ok)] font-semibold">● Online</div>
             </div>
           </div>
-          <button onClick={onClose} className="text-[#727998] hover:text-[#0a0b0d] transition-colors p-1">
+          <button onClick={onClose} className="text-[var(--brand-ink-2)] hover:text-[var(--brand-ink-0)] transition-colors p-1">
             <X size={16} />
           </button>
         </div>
@@ -115,8 +115,8 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
           {messages.length === 0 && (
             <div className="text-center py-10">
               <div className="text-3xl mb-3">👋</div>
-              <div className="text-[13px] font-bold text-[#0a0b0d]">Hi Ahmed!</div>
-              <div className="text-[11px] text-[#727998] mt-1.5 leading-relaxed">
+              <div className="text-[13px] font-bold text-[var(--brand-ink-0)]">Hi Ahmed!</div>
+              <div className="text-[11px] text-[var(--brand-ink-2)] mt-1.5 leading-relaxed">
                 Ask me anything about your job search — I can evaluate roles, draft outreach, and more.
               </div>
             </div>
@@ -127,8 +127,8 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
               <div
                 className={`max-w-[85%] text-[12px] leading-relaxed px-3 py-2 rounded-[10px] ${
                   msg.role === 'user'
-                    ? 'bg-[#0052ff] text-white rounded-br-sm'
-                    : 'bg-[#eef0f3] text-[#0a0b0d] rounded-bl-sm'
+                    ? 'bg-[var(--brand-accent)] text-white rounded-br-sm'
+                    : 'bg-[var(--brand-bg-2)] text-[var(--brand-ink-0)] rounded-bl-sm'
                 }`}
               >
                 {msg.content || (msg.isStreaming
@@ -143,7 +143,7 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
         </div>
 
         {/* Input */}
-        <div className="px-4 py-3 border-t border-[#d8dbe4] flex-shrink-0">
+        <div className="px-4 py-3 border-t border-[var(--brand-line)] flex-shrink-0">
           <div className="flex gap-2">
             <input
               type="text"
@@ -152,12 +152,12 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
               disabled={isLoading}
-              className="flex-1 border border-[#d8dbe4] rounded-[10px] px-3 py-2 text-[12px] text-[#0a0b0d] placeholder:text-[#8D96B4] outline-none focus:border-[#0052ff] disabled:opacity-50"
+              className="flex-1 border border-[var(--brand-line)] rounded-[10px] px-3 py-2 text-[12px] text-[var(--brand-ink-0)] placeholder:text-[var(--brand-ink-3)] outline-none focus:border-[var(--brand-accent)] disabled:opacity-50"
             />
             <button
               onClick={sendMessage}
               disabled={!input.trim() || isLoading}
-              className="bg-[#0052ff] text-white px-3 py-2 rounded-[10px] disabled:opacity-40 transition-opacity hover:bg-[#3a70e0]"
+              className="bg-[var(--brand-accent)] text-white px-3 py-2 rounded-[10px] disabled:opacity-40 transition-opacity hover:bg-[var(--brand-navy)]"
             >
               <Send size={14} />
             </button>

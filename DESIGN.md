@@ -1,129 +1,80 @@
-# Design System Inspired by Coinbase
+# Localized Design System
 
-## 1. Visual Theme & Atmosphere
+Single visual standard for the entire app, modeled after `/home`. The chrome, typography, and palette established on the landing page apply to every workspace page.
 
-Coinbase's website is a clean, trustworthy crypto platform that communicates financial reliability through a blue-and-white binary palette. The design uses Coinbase Blue (`#0052ff`) — a deep, saturated blue — as the singular brand accent against white and near-black surfaces. The proprietary font family includes CoinbaseDisplay for hero headlines, CoinbaseSans for UI text, CoinbaseText for body reading, and CoinbaseIcons for iconography — a comprehensive four-font system.
+## Shell
 
-The button system uses a distinctive 56px radius for pill-shaped CTAs with hover transitions to a lighter blue (`#578bfa`). The design alternates between white content sections and dark (`#0a0b0d`, `#282b31`) feature sections, creating a professional, financial-grade interface.
+- **TopBar** (`src/components/shell/TopBar.tsx`) — 64px sticky header. Four narrative slots: `Home · Events · Jobs · Career Map`. Right cluster: search, career-agent chat, notifications, avatar.
+- **WorkStrip** (`src/components/shell/WorkStrip.tsx`) — 36px secondary row, only on workspace pages. Label `MY WORK` + `Dashboard · Applications · My CV · Interview Prep`.
+- **ChatDrawer** — right-side drawer opened from TopBar's chat icon.
 
-**Key Characteristics:**
-- Coinbase Blue (`#0052ff`) as singular brand accent
-- Four-font proprietary family: Display, Sans, Text, Icons
-- 56px radius pill buttons with blue hover transition
-- Near-black (`#0a0b0d`) dark sections + white light sections
-- 1.00 line-height on display headings — ultra-tight
-- Cool gray secondary surface (`#eef0f3`) with blue tint
-- `text-transform: lowercase` on some button labels — unusual
+Routing lives under `src/app/(shell)/` — the route-group layout (`(shell)/layout.tsx`) resolves the active nav for each path and conditionally renders the WorkStrip.
 
-## 2. Color Palette & Roles
+## Typography
 
-### Primary
-- **Coinbase Blue** (`#0052ff`): Primary brand, links, CTA borders
-- **Pure White** (`#ffffff`): Primary light surface
-- **Near Black** (`#0a0b0d`): Text, dark section backgrounds
-- **Cool Gray Surface** (`#eef0f3`): Secondary button background
+Three families, loaded globally from `src/app/layout.tsx`:
 
-### Interactive
-- **Hover Blue** (`#578bfa`): Button hover background
-- **Link Blue** (`#0667d0`): Secondary link color
-- **Muted Blue** (`#5b616e`): Border color at 20% opacity
+- **Inter** (`--font-inter`, `--brand-font-display` / `--brand-font-ui`) — body, nav, UI.
+- **Fraunces** (`--font-fraunces`, `--brand-font-soft`) — display serif for hero `h1` and italic emphasis moments. Use sparingly.
+- **JetBrains Mono** (`--font-jetbrains-mono`, `--brand-font-mono`) — labels, timestamps, section numbers, micro-copy.
 
-### Surface
-- **Dark Card** (`#282b31`): Dark button/card backgrounds
-- **Light Surface** (`rgba(247,247,247,0.88)`): Subtle surface
+## Color tokens
 
-## 3. Typography Rules
+All brand tokens use a `--brand-*` prefix to avoid collision with shadcn (`--accent`, `--border`, `--ring`, etc.) and with the legacy Coinbase tokens (`--color-navy: #0a0b0d`, `--color-blue: #0052ff`) still referenced by some generative-ui components until a full migration.
 
-### Font Families
-- **Display**: `CoinbaseDisplay` — hero headlines
-- **UI / Sans**: `CoinbaseSans` — buttons, headings, nav
-- **Body**: `CoinbaseText` — reading text
-- **Icons**: `CoinbaseIcons` — icon font
+Defined in `src/app/globals.css`:
 
-### Hierarchy
+**Brand**
+- `--brand-navy: #0b2b6f` — headings, brand mark, active nav
+- `--brand-accent: #1a8fff` — active indicators, primary actions, italic emphasis
 
-| Role | Font | Size | Weight | Line Height | Notes |
-|------|------|------|--------|-------------|-------|
-| Display Hero | CoinbaseDisplay | 80px | 400 | 1.00 (tight) | Maximum impact |
-| Display Secondary | CoinbaseDisplay | 64px | 400 | 1.00 | Sub-hero |
-| Display Third | CoinbaseDisplay | 52px | 400 | 1.00 | Third tier |
-| Section Heading | CoinbaseSans | 36px | 400 | 1.11 (tight) | Feature sections |
-| Card Title | CoinbaseSans | 32px | 400 | 1.13 | Card headings |
-| Feature Title | CoinbaseSans | 18px | 600 | 1.33 | Feature emphasis |
-| Body Bold | CoinbaseSans | 16px | 700 | 1.50 | Strong body |
-| Body Semibold | CoinbaseSans | 16px | 600 | 1.25 | Buttons, nav |
-| Body | CoinbaseText | 18px | 400 | 1.56 | Standard reading |
-| Body Small | CoinbaseText | 16px | 400 | 1.50 | Secondary reading |
-| Button | CoinbaseSans | 16px | 600 | 1.20 | +0.16px tracking |
-| Caption | CoinbaseSans | 14px | 600–700 | 1.50 | Metadata |
-| Small | CoinbaseSans | 13px | 600 | 1.23 | Tags |
+**Ink (text)**
+- `--brand-ink-0: #0a1330` — primary text
+- `--brand-ink-1: #4a5470` — body text
+- `--brand-ink-2: #7a849b` — secondary text
+- `--brand-ink-3: #b5bcca` — muted / meta
 
-## 4. Component Stylings
+**Surfaces**
+- `--brand-bg-0: #ffffff` — card surface
+- `--brand-bg-1: #f7f8fb` — page background
+- `--brand-bg-2: #eef1f6` — neutral chip bg
+- `--brand-bg-paper: #fbfaf6` — canvas
 
-### Buttons
+**Lines**
+- `--brand-line: #e4e8ef`
+- `--brand-line-soft: #eef1f6`
 
-**Primary Pill (56px radius)**
-- Background: `#eef0f3` or `#282b31`
-- Radius: 56px
-- Border: `1px solid` matching background
-- Hover: `#578bfa` (light blue)
-- Focus: `2px solid black` outline
+**Severity palette** (for data meaning, not decoration)
+- `--brand-severity-ok` / `-soft` — green (matches, confirmed)
+- `--brand-severity-med` / `-soft` — amber (watch, in-progress)
+- `--brand-severity-high` / `-soft` — rose (gap, at-risk)
+- `--brand-severity-info` / `-soft` — accent blue (informational)
 
-**Full Pill (100000px radius)**
-- Used for maximum pill shape
+Each severity also has a raw color (`--brand-emerald`, `--brand-amber`, `--brand-rose`, `--brand-accent`).
 
-**Blue Bordered**
-- Border: `1px solid #0052ff`
-- Background: transparent
+## Primitives
 
-### Cards & Containers
-- Radius: 8px–40px range
-- Borders: `1px solid rgba(91,97,110,0.2)`
+- **Hero** (`src/components/primitives/Hero.tsx`) — Fraunces `h1` + optional Inter subtitle + right-aligned mono byline. Use on every page.
+- **SectionLabel** (`src/components/primitives/SectionLabel.tsx`) — `01 · Title · hairline · meta`. Numbers each major section.
+- **DataRow** (`src/components/primitives/DataRow.tsx`) — 26px logo + title + sub + tail chip. Building block for job rows, application cards, CV variants, interview sessions.
+- **SeverityCard** (`src/components/primitives/SeverityCard.tsx`) — severity tick + label + title + `forYou` body + event list. Use for "here's a situation, here's what it means, here's the evidence."
+- **PageShell** (`src/components/shell/PageShell.tsx`) — max-width 1280px container.
 
-## 5. Layout Principles
+## Usage rules
 
-### Spacing System
-- Base: 8px
-- Scale: 1px, 3px, 4px, 5px, 6px, 8px, 10px, 12px, 15px, 16px, 20px, 24px, 25px, 32px, 48px
+- **One template per page** — Hero at top, then numbered `01 / 02 / 03 …` sections. No per-page chrome experiments.
+- **Severity palette is for data meaning**, never decoration. A red tick means a gap, not "this looks nice."
+- **Mono for micro-copy** — labels, timestamps, counts, metadata. Not for body reading.
+- **Fraunces for emotional moments only** — hero `h1`, italic emphasis on a specific word. Never for body paragraphs or nav.
+- **Tailwind arbitrary values** reference CSS vars: `bg-[var(--brand-accent)]`, `text-[var(--brand-ink-0)]`. Avoid new `bg-navy` / `bg-blue` / `bg-green` classes — those resolve to the legacy Coinbase palette still registered in `@theme inline` for generative-ui compatibility. Use `bg-brand-navy`, `bg-brand-accent`, `bg-brand-severity-ok` instead.
+- **shadcn primitives** (`src/components/ui/*`) keep their shadcn tokens (`--accent`, `--border`, `--ring`). Don't apply brand tokens to them.
 
-### Border Radius Scale
-- Small (4px–8px): Article links, small cards
-- Standard (12px–16px): Cards, menus
-- Large (24px–32px): Feature containers
-- XL (40px): Large buttons/containers
-- Pill (56px): Primary CTAs
-- Full (100000px): Maximum pill
+## Legacy tokens (kept for compatibility)
 
-## 6. Depth & Elevation
+The following still live inside `@theme inline` because `src/components/generative-ui/*` reference them via Tailwind classes (`bg-navy`, `bg-blue`, `bg-green`):
 
-Minimal shadow system — depth from color contrast between dark/light sections.
+- `--color-navy: #0a0b0d` (maps to Tailwind `navy` utilities — near-black, unrelated to `--brand-navy`)
+- `--color-blue: #0052ff`
+- `--color-teal`, `--color-green`, `--color-blue-hover`, `--color-bg`, `--color-card`, `--color-border`, `--color-surface`, `--color-muted`
 
-## 7. Do's and Don'ts
-
-### Do
-- Use Coinbase Blue (#0052ff) for primary interactive elements
-- Apply 56px radius for all CTA buttons
-- Use CoinbaseDisplay for hero headings only
-- Alternate dark (#0a0b0d) and white sections
-
-### Don't
-- Don't use the blue decoratively — it's functional only
-- Don't use sharp corners on CTAs — 56px minimum
-
-## 8. Responsive Behavior
-
-Breakpoints: 400px, 576px, 640px, 768px, 896px, 1280px, 1440px, 1600px
-
-## 9. Agent Prompt Guide
-
-### Quick Color Reference
-- Brand: Coinbase Blue (`#0052ff`)
-- Background: White (`#ffffff`)
-- Dark surface: `#0a0b0d`
-- Secondary surface: `#eef0f3`
-- Hover: `#578bfa`
-- Text: `#0a0b0d`
-
-### Example Component Prompts
-- "Create hero: white background. CoinbaseDisplay 80px, line-height 1.00. Pill CTA (#eef0f3, 56px radius). Hover: #578bfa."
-- "Build dark section: #0a0b0d background. CoinbaseDisplay 64px white text. Blue accent link (#0052ff)."
+Over time, migrate generative-ui to `--brand-*` tokens and retire these.

@@ -42,8 +42,8 @@ export function SkillRadarChart({ result, compact = false }: Props) {
         <RadarChart data={chartData}>
           <PolarGrid stroke="#e5e7eb" />
           <PolarAngleAxis dataKey="skill" tick={{ fill: '#374151', fontSize: compact ? 9 : 11 }} />
-          <Radar name="Your Level" dataKey="current" stroke="#0052ff" fill="#0052ff" fillOpacity={0.3} isAnimationActive />
-          <Radar name="Role Required" dataKey="required" stroke="#0a0b0d" fill="#0a0b0d" fillOpacity={0.15} isAnimationActive />
+          <Radar name="Your Level" dataKey="current" stroke="#1a8fff" fill="#1a8fff" fillOpacity={0.3} isAnimationActive />
+          <Radar name="Role Required" dataKey="required" stroke="#0a1330" fill="#0a1330" fillOpacity={0.15} isAnimationActive />
           {!compact && <Legend wrapperStyle={{ fontSize: 12 }} />}
         </RadarChart>
       </ResponsiveContainer>

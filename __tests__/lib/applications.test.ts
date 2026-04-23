@@ -77,33 +77,33 @@ describe('computeStats', () => {
 })
 
 describe('scoreColorClass', () => {
-  it('returns green class for score >= 4.0', () => {
-    expect(scoreColorClass(4.0)).toContain('03BA82')
-    expect(scoreColorClass(4.7)).toContain('03BA82')
+  it('returns severity-ok class for score >= 4.0', () => {
+    expect(scoreColorClass(4.0)).toContain('brand-severity-ok')
+    expect(scoreColorClass(4.7)).toContain('brand-severity-ok')
   })
 
-  it('returns amber class for score >= 3.5 and < 4.0', () => {
-    expect(scoreColorClass(3.5)).toContain('FAA82C')
-    expect(scoreColorClass(3.9)).toContain('FAA82C')
+  it('returns severity-med class for score >= 3.5 and < 4.0', () => {
+    expect(scoreColorClass(3.5)).toContain('brand-severity-med')
+    expect(scoreColorClass(3.9)).toContain('brand-severity-med')
   })
 
-  it('returns red class for score < 3.5', () => {
-    expect(scoreColorClass(3.4)).toContain('F84E4E')
-    expect(scoreColorClass(2.0)).toContain('F84E4E')
+  it('returns severity-high class for score < 3.5', () => {
+    expect(scoreColorClass(3.4)).toContain('brand-severity-high')
+    expect(scoreColorClass(2.0)).toContain('brand-severity-high')
   })
 })
 
 describe('cardLeftBorderClass', () => {
-  it('returns blue border for interview alert', () => {
-    expect(cardLeftBorderClass('interview', 'interview')).toContain('4584FF')
+  it('returns accent border for interview alert', () => {
+    expect(cardLeftBorderClass('interview', 'interview')).toContain('brand-accent')
   })
 
-  it('returns amber border for follow-up alert', () => {
-    expect(cardLeftBorderClass('follow-up', 'applied')).toContain('FAA82C')
+  it('returns severity-med border for follow-up alert', () => {
+    expect(cardLeftBorderClass('follow-up', 'applied')).toContain('brand-severity-med')
   })
 
-  it('returns amber border for deadline alert', () => {
-    expect(cardLeftBorderClass('deadline', 'offer')).toContain('FAA82C')
+  it('returns severity-med border for deadline alert', () => {
+    expect(cardLeftBorderClass('deadline', 'offer')).toContain('brand-severity-med')
   })
 
   it('returns transparent border for null alert on non-offer status', () => {
