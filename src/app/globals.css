@@ -55,6 +55,47 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* ── Localized brand tokens (namespaced --color-brand-* to avoid collision
+     with the Coinbase --color-navy/--color-blue/etc. above, which generative-ui
+     components still consume as bg-navy/bg-blue. A later cleanup task migrates
+     those over.) ── */
+  --color-brand-navy: #0b2b6f;
+  --color-brand-accent: #1a8fff;
+  --color-brand-ink-0: #0a1330;
+  --color-brand-ink-1: #4a5470;
+  --color-brand-ink-2: #7a849b;
+  --color-brand-ink-3: #b5bcca;
+  --color-brand-bg-0: #ffffff;
+  --color-brand-bg-1: #f7f8fb;
+  --color-brand-bg-2: #eef1f6;
+  --color-brand-bg-paper: #fbfaf6;
+  --color-brand-line: #e4e8ef;
+  --color-brand-line-soft: #eef1f6;
+
+  /* Severity palette */
+  --color-brand-rose: #e05a6a;
+  --color-brand-rose-soft: #fde9ec;
+  --color-brand-amber: #e09d3b;
+  --color-brand-amber-soft: #fdf3e2;
+  --color-brand-emerald: #16a34a;
+  --color-brand-emerald-soft: #e6f7ee;
+
+  /* Severity semantic aliases */
+  --color-brand-severity-high: var(--color-brand-rose);
+  --color-brand-severity-high-soft: var(--color-brand-rose-soft);
+  --color-brand-severity-med: var(--color-brand-amber);
+  --color-brand-severity-med-soft: var(--color-brand-amber-soft);
+  --color-brand-severity-ok: var(--color-brand-emerald);
+  --color-brand-severity-ok-soft: var(--color-brand-emerald-soft);
+  --color-brand-severity-info: var(--color-brand-accent);
+  --color-brand-severity-info-soft: rgba(26, 143, 255, 0.12);
+
+  /* Brand font families (populated by root layout.tsx in a later task) */
+  --font-brand-display: var(--font-inter), system-ui, sans-serif;
+  --font-brand-soft: var(--font-fraunces), 'Times New Roman', serif;
+  --font-brand-ui: var(--font-inter), system-ui, sans-serif;
+  --font-brand-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
 
 :root {
@@ -126,14 +167,47 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+:root {
+  --brand-navy: var(--color-brand-navy);
+  --brand-accent: var(--color-brand-accent);
+  --brand-ink-0: var(--color-brand-ink-0);
+  --brand-ink-1: var(--color-brand-ink-1);
+  --brand-ink-2: var(--color-brand-ink-2);
+  --brand-ink-3: var(--color-brand-ink-3);
+  --brand-bg-0: var(--color-brand-bg-0);
+  --brand-bg-1: var(--color-brand-bg-1);
+  --brand-bg-2: var(--color-brand-bg-2);
+  --brand-bg-paper: var(--color-brand-bg-paper);
+  --brand-line: var(--color-brand-line);
+  --brand-line-soft: var(--color-brand-line-soft);
+  --brand-rose: var(--color-brand-rose);
+  --brand-rose-soft: var(--color-brand-rose-soft);
+  --brand-amber: var(--color-brand-amber);
+  --brand-amber-soft: var(--color-brand-amber-soft);
+  --brand-emerald: var(--color-brand-emerald);
+  --brand-emerald-soft: var(--color-brand-emerald-soft);
+  --brand-severity-high: var(--color-brand-severity-high);
+  --brand-severity-high-soft: var(--color-brand-severity-high-soft);
+  --brand-severity-med: var(--color-brand-severity-med);
+  --brand-severity-med-soft: var(--color-brand-severity-med-soft);
+  --brand-severity-ok: var(--color-brand-severity-ok);
+  --brand-severity-ok-soft: var(--color-brand-severity-ok-soft);
+  --brand-severity-info: var(--color-brand-severity-info);
+  --brand-severity-info-soft: var(--color-brand-severity-info-soft);
+  --brand-font-display: var(--font-brand-display);
+  --brand-font-soft: var(--font-brand-soft);
+  --brand-font-ui: var(--font-brand-ui);
+  --brand-font-mono: var(--font-brand-mono);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #f7f8fa;
-    font-family: 'Figtree', sans-serif;
+    background-color: var(--brand-bg-1);
+    font-family: var(--brand-font-ui);
   }
   html {
     @apply font-sans;
