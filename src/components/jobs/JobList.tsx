@@ -10,7 +10,7 @@ interface JobListProps {
 export function JobList({ jobs, selectedJobId, onSelect }: JobListProps) {
   if (jobs.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-[#8D96B4] text-sm font-semibold">
+      <div className="flex items-center justify-center h-full text-[var(--brand-ink-3)] text-sm font-semibold">
         No jobs match your filters
       </div>
     )

@@ -23,13 +23,13 @@ export function FilterBar({ filters, totalCount, onChange }: FilterBarProps) {
     `flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer border transition-colors ${
       active
         ? variant === 'green'
-          ? 'bg-[#E6FAF4] border-[#03BA82] text-[#009C6C]'
-          : 'bg-[#e8f0fe] border-[#0052ff] text-[#0052ff]'
-        : 'bg-white border-[#d8dbe4] text-[#727998] hover:border-[#0052ff] hover:text-[#0052ff]'
+          ? 'bg-[var(--brand-severity-ok-soft)] border-[var(--brand-severity-ok)] text-[var(--brand-severity-ok)]'
+          : 'bg-[var(--brand-severity-info-soft)] border-[var(--brand-accent)] text-[var(--brand-accent)]'
+        : 'bg-white border-[var(--brand-line)] text-[var(--brand-ink-2)] hover:border-[var(--brand-accent)] hover:text-[var(--brand-accent)]'
     }`
 
   return (
-    <div className="flex items-center gap-2.5 px-7 py-4 border-b border-[#d8dbe4] flex-wrap">
+    <div className="flex items-center gap-2.5 px-7 py-4 border-b border-[var(--brand-line)] flex-wrap">
       {CATEGORIES.map(cat => (
         <button
           key={cat.value}
@@ -40,7 +40,7 @@ export function FilterBar({ filters, totalCount, onChange }: FilterBarProps) {
         </button>
       ))}
 
-      <div className="w-px h-5 bg-[#d8dbe4] flex-shrink-0" />
+      <div className="w-px h-5 bg-[var(--brand-line)] flex-shrink-0" />
 
       <button
         className={chip(filters.minScore === 4.0, () => {}, 'Strong match (4.0+)', 'green')}
@@ -71,7 +71,7 @@ export function FilterBar({ filters, totalCount, onChange }: FilterBarProps) {
         </button>
       ))}
 
-      <span className="ml-auto text-xs text-[#727998] flex-shrink-0">
+      <span className="ml-auto text-xs text-[var(--brand-ink-2)] flex-shrink-0">
         {totalCount} jobs · sorted by match
       </span>
     </div>

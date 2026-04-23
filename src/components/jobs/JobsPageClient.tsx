@@ -57,18 +57,18 @@ export function JobsPageClient({ initialJobs }: JobsPageClientProps) {
       {/* Page header */}
       <div className="px-7 pt-6 pb-4 flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-xl font-extrabold text-[#0a0b0d]">Job Matches</h1>
-          <p className="text-[12px] text-[#727998] mt-0.5">
+          <h1 className="text-xl font-extrabold text-[var(--brand-ink-0)]">Job Matches</h1>
+          <p className="text-[12px] text-[var(--brand-ink-2)] mt-0.5">
             Agent-scanned from Greenhouse, Lever, Ashby · MENA companies
           </p>
         </div>
         <button
           onClick={refreshJobs}
           disabled={isScanning}
-          className="flex items-center gap-2 bg-[#e8f0fe] border border-[#d0e4ff] text-[#0052ff] text-[12px] font-semibold px-3.5 py-1.5 rounded-full"
+          className="flex items-center gap-2 bg-[var(--brand-severity-info-soft)] border border-[var(--brand-severity-info-soft)] text-[var(--brand-accent)] text-[12px] font-semibold px-3.5 py-1.5 rounded-full"
         >
           {isScanning ? (
-            <><div className="w-1.5 h-1.5 rounded-full bg-[#03BA82] animate-pulse" /> Scanning…</>
+            <><div className="w-1.5 h-1.5 rounded-full bg-[var(--brand-severity-ok)] animate-pulse" /> Scanning…</>
           ) : (
             'Scan for new jobs'
           )}
@@ -81,7 +81,7 @@ export function JobsPageClient({ initialJobs }: JobsPageClientProps) {
       {/* Two-panel body */}
       <div className="flex flex-1 overflow-hidden">
         {/* Job list */}
-        <div className="w-[360px] flex-shrink-0 overflow-y-auto border-r border-[#d8dbe4] bg-[#F8F9FB]">
+        <div className="w-[360px] flex-shrink-0 overflow-y-auto border-r border-[var(--brand-line)] bg-[var(--brand-bg-1)]">
           <JobList jobs={filteredJobs} selectedJobId={selectedJob?.id ?? null} onSelect={setSelectedJob} />
         </div>
 
@@ -89,7 +89,7 @@ export function JobsPageClient({ initialJobs }: JobsPageClientProps) {
         {selectedJob ? (
           <JobDetail job={selectedJob} cvMarkdown={DEMO_CV} />
         ) : (
-          <div className="flex-1 flex items-center justify-center text-[#8D96B4] text-sm font-semibold">
+          <div className="flex-1 flex items-center justify-center text-[var(--brand-ink-3)] text-sm font-semibold">
             Select a job to see details
           </div>
         )}
