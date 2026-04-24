@@ -15,3 +15,10 @@ export { saveGraph, loadGraph, clearGraph, STORAGE_KEY_PREFIX } from './store'
 export { seedFromProfile } from './seed'
 export type { SeedOptions } from './seed'
 export { DEMO_AHMED_GRAPH, DEMO_AHMED_LAYOUT } from './demo-ahmed'
+export { applyRadarSignals, DEFAULT_MENA_SIGNALS } from './radar'
+export type {
+  RadarSignal,
+  RadarSeverity,
+  ApplyRadarResult,
+  ApplyRadarOptions,
+} from './radar'
