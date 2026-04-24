@@ -5,7 +5,11 @@ import { getVectorStore, setVectorStore, getMarkdownFromRedis } from '@/lib/vect
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { OpenAIEmbeddings } from '@langchain/openai'
 import { MemoryVectorStore } from 'langchain/vectorstores/memory'
+import { writeMapNodeTool } from './tools/write-map-node'
 import type { SkillGap, SkillGapResult, LearningPathResult, ExpertMatchResult, LearningPhase, ParsedResumeResult, CurrentSkill, JobMarketScanResult, JobMatch, InterviewQuestion, InterviewEvaluation, SalaryBenchmarkResult, SalaryRange, CertificationPremium, UserProfile } from '@/types'
+
+export { writeMapNodeTool } from './tools/write-map-node'
+export type { WriteMapNodeStatus, WriteMapNodePatch, WriteMapNodeResult } from './tools/write-map-node'
 
 function findBestRole(targetRole: string) {
   const lower = targetRole.toLowerCase()
@@ -529,4 +533,4 @@ export function createSearchResumeTool(threadId: string) {
   )
 }
 
-export const allTools = [skillGapAnalysisTool, learningPathTool, expertMatchTool, careerInsightTool, updateProfileTool, parseResumeTool, jobMarketScanTool, generateInterviewQuestionTool, evaluateInterviewAnswerTool, salaryBenchmarkTool]
+export const allTools = [skillGapAnalysisTool, learningPathTool, expertMatchTool, careerInsightTool, updateProfileTool, parseResumeTool, jobMarketScanTool, generateInterviewQuestionTool, evaluateInterviewAnswerTool, salaryBenchmarkTool, writeMapNodeTool]
