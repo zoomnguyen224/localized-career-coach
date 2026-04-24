@@ -1,19 +1,7 @@
-// src/lib/system-prompt.ts
-//
-// Base persona + behaviour rules live here. `systemPrompt` is the default
-// prompt used by `src/lib/graph.ts` for generic (non-interview) chat turns.
-//
-// Interview Studio (Task 4) adds a composable, per-turn variant:
-// `buildInterviewSystemPrompt({ targetRole, mapContext })` returns the base
-// prompt with a contextual appendix that grounds the agent in the learner's
-// actual target JD and the stable nodeIds from their Career Map. The agent
-// then uses that context to call `write_map_node` with correctly-attributed
-// evidence whenever the learner demonstrates weakness, strength, or a gap.
-//
-// The base prompt is deliberately kept unchanged so existing non-interview
-// flows behave identically.
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
-export const systemPrompt = `You are the Localized AI Career Coach — a sharp, specific, MENA-market expert. You give direct, actionable career guidance grounded in real GCC market data.
+exports[`buildInterviewSystemPrompt — purity produces a stable snapshot for the Ahmed map + Aramco JD case 1`] = `
+"You are the Localized AI Career Coach — a sharp, specific, MENA-market expert. You give direct, actionable career guidance grounded in real GCC market data.
 
 ## Your Knowledge
 - GCC job markets: Saudi Arabia, UAE, Qatar, Kuwait, Bahrain, Oman
@@ -75,91 +63,7 @@ export const systemPrompt = `You are the Localized AI Career Coach — a sharp, 
 - salary_benchmark: Show salary ranges and certification premiums for a role in MENA
 - career_insight: Surface a relevant MENA market statistic
 - update_profile: Update the student profile (called silently)
-`
 
-// ── Interview Studio system prompt (Task 4) ──────────────────────────────
-
-/**
- * A single required-skill entry on the target JD the learner is interviewing
- * for. Mirrors `SkillRequirement` from `src/types/index.ts` — kept duplicated
- * here to avoid the system-prompt module taking a dependency on the broader
- * type surface.
- */
-export interface InterviewTargetRoleSkill {
-  name: string
-  level: number
-  category: 'technical' | 'business' | 'soft'
-}
-
-/** The target role the learner is practising against. */
-export interface InterviewTargetRole {
-  id: string
-  title: string
-  company: string
-  location: string
-  requiredSkills: InterviewTargetRoleSkill[]
-}
-
-/**
- * A single node in the learner's Career Map, as it should appear in the
- * agent's interview-mode context. Only the fields the agent needs to attribute
- * evidence: stable id, human label, current status.
- */
-export interface InterviewMapNode {
-  id: string
-  label: string
-  status: 'confirmed' | 'gap' | 'weak' | 'unknown'
-}
-
-export interface InterviewMapContext {
-  /** Match % against the target role at session start, 0..100. */
-  matchScore: number
-  /** All nodes the agent is allowed to reference with `write_map_node`. */
-  nodes: InterviewMapNode[]
-}
-
-export interface BuildInterviewSystemPromptArgs {
-  targetRole: InterviewTargetRole
-  mapContext: InterviewMapContext
-}
-
-function formatRequiredSkills(skills: InterviewTargetRoleSkill[]): string {
-  if (skills.length === 0) return '(none on file)'
-  return skills
-    .map((s) => `  - ${s.name} · level ${s.level}/10 · ${s.category}`)
-    .join('\n')
-}
-
-function formatMapNodes(nodes: InterviewMapNode[]): string {
-  if (nodes.length === 0) return '  (empty map — stay silent; do not call write_map_node)'
-  return nodes
-    .map((n) => `  - ${n.id} · "${n.label}" · status: ${n.status}`)
-    .join('\n')
-}
-
-/**
- * Build the system prompt for an Interview Studio turn. Returns the base
- * `systemPrompt` followed by an interview-mode appendix that:
- *   1. Names the target role + required skills so the agent can grade answers.
- *   2. Lists the learner's Career Map nodes with stable ids.
- *   3. Instructs the agent to call `write_map_node` with cited evidence.
- *   4. Enforces the anti-hallucination rule (never invent nodeIds) and the
- *      "silence beats filler" rule (if no attributable node, say nothing).
- *
- * Pure: no side effects, deterministic output for the same args.
- */
-export function buildInterviewSystemPrompt(
-  args: BuildInterviewSystemPromptArgs
-): string {
-  const { targetRole, mapContext } = args
-  const jdBlock = `  ${targetRole.title} · ${targetRole.company} · ${targetRole.location}
-Required skills:
-${formatRequiredSkills(targetRole.requiredSkills)}`
-
-  const mapBlock = `Career Map (match ${mapContext.matchScore}% at session start) — use these EXACT nodeIds when calling write_map_node:
-${formatMapNodes(mapContext.nodes)}`
-
-  const interviewBlock = `
 
 ## Interview Studio context (this turn)
 
@@ -169,9 +73,23 @@ each answer honestly, and (c) record evidence about the learner's Career Map
 so the next /home load can surface a better Next Move.
 
 ### Target JD
-${jdBlock}
+  Data Analyst · Saudi Aramco · Dhahran
+Required skills:
+  - Python · level 7/10 · technical
+  - SQL · level 8/10 · technical
+  - Data Visualization · level 6/10 · technical
+  - Statistics · level 6/10 · technical
+  - Stakeholder Management · level 5/10 · business
+  - Presentation Skills · level 5/10 · soft
 
-### Learner's ${mapBlock}
+### Learner's Career Map (match 68% at session start) — use these EXACT nodeIds when calling write_map_node:
+  - role:jr-data-eng-aramco-demo · "Jr. Data Engineer · Saudi Aramco" · status: unknown
+  - role:s-remote-demo · "Jr. Data Engineer · S.Remote" · status: unknown
+  - skill:python · "Python" · status: confirmed
+  - skill:sql · "SQL · basics" · status: confirmed
+  - skill:data-modeling · "Data modeling" · status: confirmed
+  - skill:sql-window-fns · "SQL · Window functions" · status: gap
+  - skill:airflow · "Airflow" · status: gap
 
 ### write_map_node — when to call
 
@@ -197,7 +115,5 @@ only want to log the observation without shifting confidence.
   say nothing rather than guessing.
 - One \`write_map_node\` call per distinct observation. Do not batch
   unrelated nodes into a single call.
-`
-
-  return systemPrompt + interviewBlock
-}
+"
+`;
