@@ -281,7 +281,22 @@ export function computeNextMove(
   const confidence = graphConfidence(graph)
   if (confidence < minGraphConfidence) return null
 
-  const roleShort = target.label.split(' · ').slice(1).join(' · ') || target.label
+  // The seed stores role labels as "Jr. Data Engineer · Saudi Aramco". The
+  // deck renders the short label as "Saudi Aramco Jr. Data Eng" (company
+  // first, "Engineer" abbreviated). Abbreviate a handful of common long-form
+  // suffixes so the final label fits the deck's Next Move card copy.
+  const abbreviateTitle = (t: string): string =>
+    t
+      .replace(/\bEngineer\b/gi, 'Eng')
+      .replace(/\bAdministrator\b/gi, 'Admin')
+      .replace(/\bDeveloper\b/gi, 'Dev')
+  const labelParts = target.label.split(' · ')
+  const titlePart = (labelParts[0] ?? '').trim()
+  const companyPart = (labelParts[1] ?? '').trim()
+  const roleShort =
+    companyPart && titlePart
+      ? `${companyPart} ${abbreviateTitle(titlePart)}`
+      : companyPart || titlePart || target.label
 
   // ── application fast-path ──────────────────────────────────────────────
   if (graph.matchScore >= 80 && prereqsAllConfirmed(graph, target.id)) {

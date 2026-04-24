@@ -109,6 +109,15 @@ describe('computeNextMove — Ahmed demo', () => {
     expect(move!.label).toMatch(/20 min/)
   })
 
+  it('emits the deck-literal label format "Mock interview · Saudi Aramco Jr. Data Eng · 20 min"', () => {
+    const { graph: radarGraph } = applyRadarSignals(DEMO_AHMED_GRAPH, DEFAULT_MENA_SIGNALS, {
+      now: NOW,
+    })
+    const move = computeNextMove(radarGraph)
+    expect(move).not.toBeNull()
+    expect(move!.label).toBe('Mock interview · Saudi Aramco Jr. Data Eng · 20 min')
+  })
+
   it('is pure: Ahmed demo is unchanged after computeNextMove', () => {
     const before = snap(DEMO_AHMED_GRAPH)
     computeNextMove(DEMO_AHMED_GRAPH)
