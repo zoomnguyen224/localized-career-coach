@@ -14,6 +14,7 @@ export { isCareerGraph, isCareerNode, isCareerEdge } from './types'
 export { saveGraph, loadGraph, clearGraph, STORAGE_KEY_PREFIX } from './store'
 export { seedFromProfile } from './seed'
 export type { SeedOptions } from './seed'
+export { recomputeMatchScore, statusToEffectiveLevel, MATCH_SCORE_FLOOR } from './recompute-score'
 export { DEMO_AHMED_GRAPH, DEMO_AHMED_LAYOUT } from './demo-ahmed'
 export { applyRadarSignals, DEFAULT_MENA_SIGNALS } from './radar'
 export type {

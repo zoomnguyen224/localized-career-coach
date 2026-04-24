@@ -45,6 +45,11 @@ export const DEMO_AHMED_GRAPH: CareerGraph = {
     },
 
     // ── confirmed skills ────────────────────────────────────────────────
+    // `requiredLevel` + `currentLevel` on each skill node power
+    // `recomputeMatchScore` (see src/lib/career-map/recompute-score.ts).
+    // Numbers hand-tuned so the raw percent rounds to 68 — matching deck page
+    // 4's match figure. Total required = 7+6+6+10+8 = 37. Capped current =
+    // 7+6+6+4+2 = 25. round(25/37 * 100) = 68.
     {
       id: 'skill:python',
       label: 'Python',
@@ -53,6 +58,8 @@ export const DEMO_AHMED_GRAPH: CareerGraph = {
       confidence: 0.95,
       evidence: [{ source: 'cv', at: NOW, detail: 'level 8/10 from CV' }],
       weight: 0.75,
+      requiredLevel: 7,
+      currentLevel: 8,
     },
     {
       id: 'skill:sql',
@@ -62,6 +69,8 @@ export const DEMO_AHMED_GRAPH: CareerGraph = {
       confidence: 0.9,
       evidence: [{ source: 'cv', at: NOW, detail: 'level 7/10 from CV' }],
       weight: 0.7,
+      requiredLevel: 6,
+      currentLevel: 7,
     },
     {
       id: 'skill:data-modeling',
@@ -71,6 +80,8 @@ export const DEMO_AHMED_GRAPH: CareerGraph = {
       confidence: 0.85,
       evidence: [{ source: 'cv', at: NOW, detail: 'level 7/10 from CV' }],
       weight: 0.65,
+      requiredLevel: 6,
+      currentLevel: 7,
     },
 
     // ── gaps ────────────────────────────────────────────────────────────
@@ -85,6 +96,8 @@ export const DEMO_AHMED_GRAPH: CareerGraph = {
         { source: 'cv:missing', at: NOW, detail: 'not detected in CV' },
       ],
       weight: 0.92,
+      requiredLevel: 10,
+      currentLevel: 4,
     },
     {
       id: 'skill:airflow',
@@ -94,6 +107,8 @@ export const DEMO_AHMED_GRAPH: CareerGraph = {
       confidence: 0.8,
       evidence: [{ source: 'cv:missing', at: NOW, detail: 'not detected in CV' }],
       weight: 0.7,
+      requiredLevel: 8,
+      currentLevel: 2,
     },
   ],
   edges: [

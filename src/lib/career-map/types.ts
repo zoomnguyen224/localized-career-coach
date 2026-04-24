@@ -23,6 +23,17 @@ export interface CareerNode {
   confidence: number  // 0..1, how sure we are about `status`
   evidence: NodeEvidence[]
   weight: number      // importance / severity, set by seed + Radar
+  /** Target JD requirement level, 1..10. Present on `skill` nodes seeded from a
+   *  MENA role (or authored into the Ahmed demo fixture) so `recomputeMatchScore`
+   *  can re-run the seed's arithmetic after a `write_map_node` patch without
+   *  re-looking-up the role definition. Optional to keep isCareerNode backward-
+   *  compatible with legacy payloads persisted before Task 4b. */
+  requiredLevel?: number
+  /** Learner's effective level on this skill, 0..10. Stored so
+   *  `recomputeMatchScore` stays in lockstep with `seed.ts`'s arithmetic
+   *  (which uses `min(effectiveLevel, requiredLevel)`) after interview
+   *  write-backs change a node's status. Optional for back-compat. */
+  currentLevel?: number
 }
 
 export interface CareerEdge {
@@ -72,6 +83,12 @@ export function isCareerNode(value: unknown): value is CareerNode {
   if (typeof n.confidence !== 'number' || n.confidence < 0 || n.confidence > 1) return false
   if (!Array.isArray(n.evidence)) return false
   if (typeof n.weight !== 'number') return false
+  if (n.requiredLevel !== undefined) {
+    if (typeof n.requiredLevel !== 'number' || n.requiredLevel < 0) return false
+  }
+  if (n.currentLevel !== undefined) {
+    if (typeof n.currentLevel !== 'number' || n.currentLevel < 0) return false
+  }
   return true
 }
 

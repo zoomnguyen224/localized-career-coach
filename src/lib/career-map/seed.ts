@@ -14,6 +14,7 @@
 import { MENA_ROLES } from '@/lib/mock-data'
 import type { CurrentSkill, UserProfile, MENARole } from '@/types'
 import type { CareerGraph, CareerNode, CareerEdge } from './types'
+import { recomputeMatchScore } from './recompute-score'
 
 // ── shared with src/lib/tools.ts (keep in sync) ──────────────────────────
 // Adjacent skills that provide partial credit when the exact skill name is
@@ -129,8 +130,6 @@ export function seedFromProfile(
   nodes.push(roleNode)
 
   // ── skill nodes (one per required skill) ──────────────────────────────
-  let totalRequiredLevel = 0
-  let totalCurrentLevel = 0
   const gapsBySkill: Array<{ node: CareerNode; gapSize: number }> = []
 
   for (const req of role.requiredSkills) {
@@ -167,10 +166,13 @@ export function seedFromProfile(
           ? [{ source: 'cv:cross', at: now, detail: `inferred ${cross}/10 from adjacent skills` }]
           : [{ source: 'cv:missing', at: now, detail: 'not detected in CV' }],
       weight,
+      // requiredLevel + currentLevel are load-bearing for recomputeMatchScore —
+      // see src/lib/career-map/recompute-score.ts. Without them, post-interview
+      // patches can't re-score the graph without drift.
+      requiredLevel: req.level,
+      currentLevel: effectiveLevel,
     }
     nodes.push(node)
-    totalRequiredLevel += req.level
-    totalCurrentLevel += Math.min(effectiveLevel, req.level)
 
     if (status === 'gap') gapsBySkill.push({ node, gapSize: gap })
 
@@ -199,10 +201,20 @@ export function seedFromProfile(
       })
     })
 
-  // ── matchScore (mirrors skillGapAnalysisTool including 65% floor) ─────
-  const rawPercent =
-    totalRequiredLevel === 0 ? 0 : Math.round((totalCurrentLevel / totalRequiredLevel) * 100)
-  const matchScore = Math.max(65, rawPercent)
+  // ── matchScore (via shared recomputeMatchScore helper) ────────────────
+  // Previously inlined here; extracted to `recompute-score.ts` so that Task 4b
+  // (write_map_node interview patches) can recompute with the exact same math.
+  // Build a throwaway graph shell just for the helper — the final graph is
+  // returned below with this score plugged in.
+  const matchScore = recomputeMatchScore({
+    version: 1,
+    learnerId,
+    targetRoleId,
+    nodes,
+    edges,
+    matchScore: 0,
+    updatedAt: now,
+  })
 
   // Apply the match score to the role node's weight-ish field via evidence
   // (the role itself isn't a skill, so weight stays 1). We attach the
