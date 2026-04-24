@@ -22,3 +22,5 @@ export type {
   ApplyRadarResult,
   ApplyRadarOptions,
 } from './radar'
+export { computeNextMove } from './next-move'
+export type { NextMove, NextMoveKind, NextMoveOptions } from './next-move'
