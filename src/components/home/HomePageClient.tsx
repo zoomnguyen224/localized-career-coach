@@ -7,7 +7,15 @@ import styles from '@/app/(shell)/home/home.module.css'
 import { SectionLabel } from '@/components/primitives/SectionLabel'
 import { SeverityCard } from '@/components/primitives/SeverityCard'
 import { DataRow } from '@/components/primitives/DataRow'
-import { loadGraph, type CareerGraph, type CareerNode } from '@/lib/career-map'
+import {
+  applyRadarSignals,
+  computeNextMove,
+  DEFAULT_MENA_SIGNALS,
+  loadGraph,
+  type CareerGraph,
+  type NextMove,
+  type RadarSignal,
+} from '@/lib/career-map'
 import { DEMO_AHMED_LAYOUT } from '@/lib/career-map/demo-ahmed'
 import { getActiveThreadId } from '@/lib/conversation-store'
 import { CareerMapSection } from './CareerMapSection'
@@ -21,15 +29,10 @@ interface HomePageClientProps {
   learnerTagline: string
 }
 
-function topGap(graph: CareerGraph): CareerNode | undefined {
-  return graph.nodes
-    .filter(n => n.kind === 'skill' && (n.status === 'gap' || n.status === 'weak'))
-    .sort((a, b) => b.weight - a.weight)[0]
-}
-
 function primaryRoleLabel(graph: CareerGraph): string {
   const roles = graph.nodes.filter(n => n.kind === 'role')
-  return roles[0]?.label ?? 'your target role'
+  const target = roles.find(r => r.id === `role:${graph.targetRoleId}`) ?? roles[0]
+  return target?.label ?? 'your target role'
 }
 
 export function HomePageClient({
@@ -57,20 +60,29 @@ export function HomePageClient({
   const isDemo = graph === demoFallback
   const layoutOverride = isDemo ? DEMO_AHMED_LAYOUT : undefined
 
-  const primaryLabel = primaryRoleLabel(graph)
-  const primaryCompany = primaryLabel.split(' · ')[1] ?? primaryLabel
-  const gap = useMemo(() => topGap(graph), [graph])
+  // Radar + Next Move are pure functions of the graph. `useMemo` keeps them
+  // stable across re-renders that don't actually change the graph reference.
+  const { radarGraph, cards } = useMemo(() => {
+    const { graph: g, cards: c } = applyRadarSignals(graph, DEFAULT_MENA_SIGNALS)
+    return { radarGraph: g, cards: c }
+  }, [graph])
+
+  const nextMove = useMemo(() => computeNextMove(radarGraph), [radarGraph])
 
   return (
     <>
-      <MarketRadarSection matchScore={graph.matchScore} primaryCompany={primaryCompany} />
+      <MarketRadarSection cards={cards} primaryRoleLabel={primaryRoleLabel(radarGraph)} />
       <CareerMapSection
-        graph={graph}
+        graph={radarGraph}
         layoutOverride={layoutOverride}
         learnerName={learnerName}
         learnerTagline={learnerTagline}
       />
-      <NextMoveSection graph={graph} />
+      <NextMoveSection
+        nextMove={nextMove}
+        primaryRoleLabel={primaryRoleLabel(radarGraph)}
+        targetRoleId={radarGraph.targetRoleId}
+      />
       {/* NotHereSection is rendered by the server shell — it's static. */}
 
       {!hydrated ? (
@@ -92,127 +104,181 @@ export function HomePageClient({
       ) : null}
     </>
   )
-
-  // Section components defined inside the default export are also fine, but
-  // keeping them at module scope below makes them easier to test and lint.
 }
 
-/* ── Market Radar — three hardcoded signals per Task 2 spec. Task 3 will
-      replace these with computed signals. Only the role name + match % are
-      derived from the loaded graph. ─────────────────────────────────────── */
-function MarketRadarSection({
-  matchScore,
-  primaryCompany,
-}: {
-  matchScore: number
-  primaryCompany: string
-}) {
+/* ── Market Radar — rendered from the RadarSignal cards returned by
+      applyRadarSignals. Each card gets a SeverityCard; the contextual
+      footer rows are a small deck-literal mapping keyed on signal id so
+      we preserve the visual richness without coupling business logic to
+      the copy. ───────────────────────────────────────────────────────── */
+
+interface MarketRadarSectionProps {
+  cards: RadarSignal[]
+  primaryRoleLabel: string
+}
+
+function MarketRadarSection({ cards, primaryRoleLabel }: MarketRadarSectionProps) {
   return (
     <section className={styles.radar}>
       <SectionLabel number="01" title="Market Radar" meta="Updated for you · 08:14 local" />
 
       <div className={styles.radarGrid}>
-        <SeverityCard
-          tone="high"
-          label="High signal"
-          when="2 days ago"
-          title={`${primaryCompany} rewrote the Junior Data Engineer JD.`}
-          forYou={{
-            label: 'What it means for you',
-            body: (
-              <>
-                Current match <span className={styles.delta}>{matchScore}%</span>. They now require{' '}
-                <b>SQL window functions</b> — a skill worth shoring up.
-              </>
-            ),
-          }}
-          eventsHeader="The job itself"
-        >
-          <DataRow
-            href="#"
-            logo={<span className={`${styles.evLogo} ${styles.nb}`}>SA</span>}
-            title={`Jr. Data Engineer · ${primaryCompany}`}
-            sub="Dhahran / Remote · updated 2d ago"
-            tail={{ text: `${matchScore}%`, tone: matchScore >= 70 ? 'up' : 'down' }}
-          />
-        </SeverityCard>
+        {cards.map(card => (
+          <SeverityCard
+            key={card.id}
+            tone={card.severity}
+            label={severityLabel(card.severity)}
+            when={card.when ?? ''}
+            title={card.headline}
+            forYou={{
+              label: 'What it means for you',
+              body: card.body,
+            }}
+            eventsHeader={eventsHeaderFor(card)}
+          >
+            {radarFooterRowsFor(card, primaryRoleLabel)}
+          </SeverityCard>
+        ))}
+      </div>
+    </section>
+  )
+}
 
-        <SeverityCard
-          tone="med"
-          label="Medium signal"
-          when="this month"
-          title="Gulf employers are hiring remote workers from Egypt."
-          forYou={{
-            label: 'What it means for you',
-            body: (
-              <>
-                Remote Gulf postings <span className={`${styles.delta} ${styles.up}`}>+34%</span>.{' '}
-                <b>3 new roles</b> match your profile — two strong, one worth a look.
-              </>
-            ),
-          }}
-          eventsHeader="Top 2 matches · of 3"
-        >
+function severityLabel(s: RadarSignal['severity']): string {
+  if (s === 'high') return 'High signal'
+  if (s === 'med') return 'Medium signal'
+  return 'Informational'
+}
+
+function eventsHeaderFor(card: RadarSignal): string | undefined {
+  switch (card.id) {
+    case 'signal:aramco-jd-update':
+      return 'The job itself'
+    case 'signal:gulf-remote-uptick':
+      return 'Top 2 matches · of 3'
+    case 'signal:sql-window-market':
+      return 'Event that closes the gap'
+    default:
+      return undefined
+  }
+}
+
+/** Footer rows under each radar card — decorative, deck-literal DataRows
+ *  keyed by signal id. Kept as a switch so adding a new signal produces a
+ *  TypeScript-visible hole to fill in. */
+function radarFooterRowsFor(
+  card: RadarSignal,
+  primaryRoleLabel: string
+): React.ReactNode {
+  const primaryCompany = primaryRoleLabel.split(' · ')[1] ?? primaryRoleLabel
+  switch (card.id) {
+    case 'signal:aramco-jd-update':
+      return (
+        <DataRow
+          href="#"
+          logo={<span className={`${styles.evLogo} ${styles.nb}`}>SA</span>}
+          title={`Jr. Data Engineer · ${primaryCompany}`}
+          sub="Dhahran / Remote · updated 2d ago"
+          tail={{ text: '68%', tone: 'down' }}
+        />
+      )
+    case 'signal:gulf-remote-uptick':
+      return (
+        <>
           <DataRow
             href="#"
             logo={<span className={`${styles.evLogo} ${styles.vl}`}>VL</span>}
             title="Data Ops Engineer · Jr. · Veolia"
-            sub="Remote → Riyadh · posted 4d ago"
+            sub="Remote -> Riyadh · posted 4d ago"
             tail={{ text: '81%', tone: 'up' }}
           />
           <DataRow
             href="#"
             logo={<span className={`${styles.evLogo} ${styles.tr}`}>TM</span>}
             title="Applied Data Engineer · Trend Micro"
-            sub="Remote → Dubai · posted 1w ago"
+            sub="Remote -> Dubai · posted 1w ago"
             tail={{ text: '74%', tone: 'up' }}
           />
-        </SeverityCard>
-
-        <SeverityCard
-          tone="info"
-          label="Informational"
-          when="12-week drift"
-          title="SQL window functions went from nice-to-have to required."
-          forYou={{
-            label: 'What it means for you',
-            body: (
-              <>
-                Now in <span className={`${styles.delta} ${styles.neutral}`}>78%</span> of Data Eng
-                postings (was 52%). Learning <b>this one skill</b> recovers match.
-              </>
-            ),
-          }}
-          eventsHeader="Event that closes the gap"
-        >
-          <DataRow
-            href="#"
-            logo={
-              <span className={`${styles.evLogo} ${styles.evt}`}>
-                <svg viewBox="0 0 24 24">
-                  <rect x="3" y="5" width="18" height="16" rx="2" />
-                  <path d="M3 9h18M8 3v4M16 3v4" />
-                </svg>
-              </span>
-            }
-            title="Workshop · SQL Window Functions in Practice"
-            sub="Localized · Live · 90 min"
-            tail={{ text: 'May 14', tone: 'neutral' }}
-          />
-        </SeverityCard>
-      </div>
-    </section>
-  )
+        </>
+      )
+    case 'signal:sql-window-market':
+      return (
+        <DataRow
+          href="#"
+          logo={
+            <span className={`${styles.evLogo} ${styles.evt}`}>
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path d="M3 9h18M8 3v4M16 3v4" />
+              </svg>
+            </span>
+          }
+          title="Workshop · SQL Window Functions in Practice"
+          sub="Localized · Live · 90 min"
+          tail={{ text: 'May 14', tone: 'neutral' }}
+        />
+      )
+    default:
+      return null
+  }
 }
 
-/* ── Next Move — derived from the graph's highest-weight gap (placeholder
-      for Task 3's shortest-path computation). ──────────────────────────── */
-function NextMoveSection({ graph }: { graph: CareerGraph }) {
-  const gap = topGap(graph)
-  const primary = primaryRoleLabel(graph)
-  const roleShort = primary.split(' · ')[1] ?? primary
-  const gapLabel = gap?.label ?? 'your top priority skill'
-  const expectedLift = gap ? Math.max(2, Math.round(gap.weight * 5)) : 3
+/* ── Next Move — rendered from computeNextMove. When the compute returns
+      null we show a silence-beats-filler fallback. ─────────────────────── */
+
+interface NextMoveSectionProps {
+  nextMove: NextMove | null
+  primaryRoleLabel: string
+  targetRoleId: string | null
+}
+
+function NextMoveSection({
+  nextMove,
+  primaryRoleLabel,
+  targetRoleId,
+}: NextMoveSectionProps) {
+  const roleShort = primaryRoleLabel.split(' · ')[1] ?? primaryRoleLabel
+
+  if (!nextMove) {
+    return (
+      <section className={styles.move}>
+        <SectionLabel number="03" title="Your Next Move" meta="One action · chosen by your agent" />
+        <div className={styles.moveCard}>
+          <div>
+            <div className={styles.moveEyebrow}>Your one move this week</div>
+            <h2>Not here yet.</h2>
+            <p className={styles.moveWhy}>
+              Your agent doesn&apos;t have enough signal to recommend a move with confidence.
+              Complete a CV parse or run a mock interview to give it more context.
+            </p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  const confidencePct = Math.round(nextMove.confidence * 100)
+  const confidenceLabel =
+    nextMove.confidence >= 0.75 ? 'HIGH' : nextMove.confidence >= 0.5 ? 'MED' : 'LOW'
+
+  // The interview route accepts a target-role hint in the query string so the
+  // agent's first turn can ground itself against the right JD.
+  const interviewHref =
+    targetRoleId != null
+      ? `/interview?targetRoleId=${encodeURIComponent(targetRoleId)}`
+      : '/interview'
+
+  // Only `mock` actions actually wire up to /interview in Task 3. `module`
+  // and `application` stay as placeholder buttons pending Tasks 4/5.
+  const primaryIsLink = nextMove.actionKind === 'mock'
+  const ctaLabel =
+    nextMove.actionKind === 'mock'
+      ? 'Start Interview Studio'
+      : nextMove.actionKind === 'application'
+      ? 'Open application'
+      : 'Start lesson'
+
+  const h2 = headlineFor(nextMove, roleShort)
 
   return (
     <section className={styles.move}>
@@ -235,23 +301,26 @@ function NextMoveSection({ graph }: { graph: CareerGraph }) {
             Your one move this week
           </div>
 
-          <h2>
-            Mock interview — <em>{roleShort}</em>.<br />
-            20&nbsp;min, today.
-          </h2>
+          <h2>{h2}</h2>
 
-          <p className={styles.moveWhy}>
-            Agent detected <b>{gapLabel} is your top gap</b>. This mock will stress-test it in a
-            live interview flow — then auto-suggest a 25-min lesson based on where you stumble.
-          </p>
+          <p className={styles.moveWhy}>{nextMove.rationale}</p>
 
           <div className={styles.moveCta}>
-            <button type="button" className={styles.btnPrimary}>
-              Start Interview Studio
-              <svg className={styles.ic} viewBox="0 0 24 24">
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
-            </button>
+            {primaryIsLink ? (
+              <Link href={interviewHref} className={styles.btnPrimary}>
+                {ctaLabel}
+                <svg className={styles.ic} viewBox="0 0 24 24">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </Link>
+            ) : (
+              <button type="button" className={styles.btnPrimary}>
+                {ctaLabel}
+                <svg className={styles.ic} viewBox="0 0 24 24">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </button>
+            )}
             <Link href="#" className={styles.btnGhostLink}>
               Not now — show me 2 alternatives
             </Link>
@@ -263,37 +332,43 @@ function NextMoveSection({ graph }: { graph: CareerGraph }) {
             </span>
             <span className={styles.dot} />
             <span>
-              Agent confidence: <span className={styles.conf}>HIGH</span>
+              Agent confidence: <span className={styles.conf}>{confidenceLabel}</span>
+              <span className={styles.dot} style={{ marginLeft: 8 }} />
+              <span style={{ marginLeft: 8 }}>({confidencePct}%)</span>
             </span>
             <span className={styles.dot} />
             <span>
-              Expected lift: <b>+{expectedLift}% match</b>
+              Expected lift:{' '}
+              <b>
+                {nextMove.expectedMatchDelta > 0 ? '+' : ''}
+                {nextMove.expectedMatchDelta}% match
+              </b>
             </span>
           </div>
         </div>
 
         <aside className={styles.session}>
           <div className={styles.sTop}>
-            <span>Interview Studio</span>
-            <span className={styles.live}>
-              <span className={styles.dot} /> Voice · Live
-            </span>
+            <span>{sessionLabelFor(nextMove)}</span>
+            {nextMove.actionKind === 'mock' ? (
+              <span className={styles.live}>
+                <span className={styles.dot} /> Voice · Live
+              </span>
+            ) : null}
           </div>
-          <div className={styles.sTitle}>
-            4 questions · weighted toward {gapLabel}.
-          </div>
+          <div className={styles.sTitle}>{nextMove.label}</div>
           <div className={styles.sKv}>
             <div>
               <div className={styles.k}>Duration</div>
-              <div className={styles.v}>20 min</div>
+              <div className={styles.v}>{durationFor(nextMove)}</div>
             </div>
             <div>
               <div className={styles.k}>Mode</div>
-              <div className={styles.v}>Voice</div>
+              <div className={styles.v}>{modeFor(nextMove)}</div>
             </div>
             <div>
               <div className={styles.k}>Focus</div>
-              <div className={styles.v}>{gapLabel.split(' · ')[0].slice(0, 10)}</div>
+              <div className={styles.v}>{focusFor(nextMove)}</div>
             </div>
             <div>
               <div className={styles.k}>Difficulty</div>
@@ -305,4 +380,59 @@ function NextMoveSection({ graph }: { graph: CareerGraph }) {
       </div>
     </section>
   )
+}
+
+function headlineFor(move: NextMove, roleShort: string): React.ReactNode {
+  if (move.actionKind === 'mock') {
+    return (
+      <>
+        Mock interview — <em>{roleShort}</em>.<br />
+        20&nbsp;min, today.
+      </>
+    )
+  }
+  if (move.actionKind === 'application') {
+    return (
+      <>
+        Ready to apply to <em>{roleShort}</em>.<br />
+        Prereqs confirmed.
+      </>
+    )
+  }
+  // module
+  return (
+    <>
+      Complete today&apos;s lesson.<br />
+      25&nbsp;min, focused.
+    </>
+  )
+}
+
+function sessionLabelFor(move: NextMove): string {
+  if (move.actionKind === 'mock') return 'Interview Studio'
+  if (move.actionKind === 'application') return 'Application'
+  return 'Lesson'
+}
+
+function durationFor(move: NextMove): string {
+  // Try to pull the "· N min" suffix from the computed label; fall back to
+  // sensible defaults per action kind.
+  const m = move.label.match(/(\d+)\s*min/)
+  if (m) return `${m[1]} min`
+  if (move.actionKind === 'mock') return '20 min'
+  if (move.actionKind === 'application') return '—'
+  return '25 min'
+}
+
+function modeFor(move: NextMove): string {
+  if (move.actionKind === 'mock') return 'Voice'
+  if (move.actionKind === 'application') return 'Apply'
+  return 'Self-paced'
+}
+
+function focusFor(move: NextMove): string {
+  // nodeId is a slug like `skill:sql-window-fns` — trim the prefix and
+  // the kebab case for a compact display.
+  const bare = move.nodeId.replace(/^skill:|^role:/, '').replace(/-/g, ' ')
+  return bare.length > 12 ? bare.slice(0, 10) + '…' : bare
 }
